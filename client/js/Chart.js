@@ -40,7 +40,7 @@ class MyReactComponent extends React.Component {
     var data = this.state.dataset;
 
     var domain = this.props.domain;
-    var margin = {top: 20, right: 20, bottom: 30, left: 50}
+    var margin = {top: 20, right: 20, bottom: 30, left: 100}
     var width = 960 - margin.left - margin.right
     var height = 500 - margin.top - margin.bottom
 
@@ -62,7 +62,6 @@ class MyReactComponent extends React.Component {
       y: d3.scaleLinear().range([height, 0]).domain([0, data.max])
     }
 
-
     data.series.sort(function(a,b){
       return d3.ascending(a.men, b.men);
     });
@@ -71,33 +70,41 @@ class MyReactComponent extends React.Component {
 
     var enterG = binding.enter().append('g');
 
+
+
     enterG
       .append('circle')
-        .style("fill", "black")
+        .style("fill", "rgb(171,112,128)")
         .attr('class', 'men-point')
         .attr('cx', function(d, i) { return scales.x(i); })
         .attr('cy', function(d) { return scales.y(d.men); })
-        .attr('r', function(d) { return 2; });
+        .attr('r', function(d) { return d.gap > 0 ? 2 : 1; });
 
     enterG
       .append('circle')
-        .style("fill", "red")
+        .style("fill", "rgb(114,135,144)")
         .attr('class', 'women-point')
         .attr('cx', function(d, i) { return scales.x(i); })
         .attr('cy', function(d) { return scales.y(d.women); })
-        .attr('r', function(d) { return 2; });
-
-    enterG
-      .append('circle')
-        .style("fill", "red")
-        .attr('class', 'women-point')
-        .attr('cx', function(d, i) { return scales.x(i); })
-        .attr('cy', function(d) { return scales.y(d.women); })
-        .attr('r', function(d) { return 2; });
+        .attr('r', function(d) { return d.gap < 0 ? 2 : 1 });
 
     var axis = d3
       .axisRight(scales.y)
-      .tickSize(width)
+      .ticks(5)
+      .tickSize(width);
+
+    svg
+      .append("g")
+      .call(axis)
+      .call(function(g) {
+      	g.selectAll('text').remove();
+        g.select(".domain").remove();
+        g.selectAll(".tick:not(:first-of-type) line").attr("stroke", "#777").attr("stroke-dasharray", "2,2");
+      });
+
+    var axisLabel = d3
+      .axisLeft(scales.y)
+      .ticks(5)
       .tickFormat(d3.formatLocale({
           "decimal": ",",
           "thousands": ".",
@@ -105,13 +112,16 @@ class MyReactComponent extends React.Component {
           "currency": ["R$ ", ""]
         }).format("$,.2f")
       );
-
     svg
       .append("g")
-      .call(axis)
+      .call(axisLabel)
       .call(function(g) {
-      	g.selectAll('text').attr('x', 4).attr('dy', -4);
+        g.selectAll(".tick line").remove();
+        g.select(".domain").remove();
       });
+
+
+
 
     return node.toReact()
   }

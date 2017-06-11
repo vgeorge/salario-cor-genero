@@ -4,7 +4,7 @@
 
 Visualizations:
 
-* [Wall Street Journal: What's your pay gap](http://graphics.wsj.com/gender-pay-gap)
+* [Wall Street Journal: What's your pay gap?](http://graphics.wsj.com/gender-pay-gap)
 * [Mulheres nos jogos olímpicos]( http://generonumero.media/interativos/mulheres-nos-jogos-olimpicos/)
 * [Quando começamos a perder? ](http://carolx.me/_past_works/caj/mulher/)
 
