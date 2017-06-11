@@ -1,0 +1,32 @@
+# Site settings
+title: Salário, Cor e Gênero no Brasil
+email:
+description: >
+  Visualização da diferença salarial entre gênero e cor no Brasil
+baseurl: ""
+url: "https://vgeorge.github.io"
+
+# Build settings
+markdown: kramdown
+source: src
+destination: public
+sass:
+  sass_dir: assets/css/modules
+  style: compressed
+
+# live reload
+livereload: true
+reload_port: 5678
+
+# gems
+gems:
+  - jekyll-seo-tag
+  - jekyll-autoprefixer
+  - jekyll-sitemap
+
+# plugin settings
+autoprefixer:
+  browsers:
+  - last 2 versions
+
+exclude: ['node_modules', 'webpack', 'Gemfile', 'Gemfile.lock', 'Rakefile']

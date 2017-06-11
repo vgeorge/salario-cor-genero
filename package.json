@@ -1,0 +1,33 @@
+{
+  "name": "salario-cor-genero",
+  "version": "0.0.0",
+  "description": "Visualization of pay gap by gender and race in Brazil.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vgeorge/salario-cor-genero.git"
+  },
+  "keywords": [
+    "pay gap",
+    "gender",
+    "ibge",
+    "gender",
+    "race"
+  ],
+  "author": "Vitor George",
+  "license": "MIT",
+  "homepage": "https://vgeorge.github.com/salario-cor-genero",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "d3": "^4.9.1",
+    "prop-types": "^15.5.10",
+    "react": "^15.5.4",
+    "react-addons-update": "^15.5.2",
+    "react-bootstrap": "^0.31.0",
+    "react-dom": "^15.5.4",
+    "react-faux-dom": "^4.0.3",
+    "webpack": "^1.15.0"
+  }
+}
