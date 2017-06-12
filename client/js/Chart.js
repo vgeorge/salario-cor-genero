@@ -43,6 +43,8 @@ class MyReactComponent extends React.Component {
     var margin = {top: 20, right: 20, bottom: 30, left: 100}
     var width = 960 - margin.left - margin.right
     var height = 500 - margin.top - margin.bottom
+    var color = ["rgb(114,135,144)", "rgb(171,112,128)"];
+
 
     console.log('data');
     console.log(data);
@@ -70,11 +72,9 @@ class MyReactComponent extends React.Component {
 
     var enterG = binding.enter().append('g');
 
-
-
     enterG
       .append('circle')
-        .style("fill", "rgb(171,112,128)")
+        .style("fill", color[0])
         .attr('class', 'men-point')
         .attr('cx', function(d, i) { return scales.x(i); })
         .attr('cy', function(d) { return scales.y(d.men); })
@@ -82,11 +82,19 @@ class MyReactComponent extends React.Component {
 
     enterG
       .append('circle')
-        .style("fill", "rgb(114,135,144)")
+        .style("fill", color[1])
         .attr('class', 'women-point')
         .attr('cx', function(d, i) { return scales.x(i); })
         .attr('cy', function(d) { return scales.y(d.women); })
         .attr('r', function(d) { return d.gap < 0 ? 2 : 1 });
+
+    enterG
+      .append('path')
+        .style("stroke", function(d){ return d.gap > 0 ? color[0] : color[1] })
+        .attr('d', function(d, i){
+          return 'M ' + scales.x(i) + ' ' + scales.y(d.men) + ' L ' + scales.x(i) + ' ' + scales.y(d.women)
+        })
+
 
     var axis = d3
       .axisRight(scales.y)
