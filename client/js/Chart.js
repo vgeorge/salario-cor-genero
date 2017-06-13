@@ -1,63 +1,55 @@
 import React from 'react';
 import * as d3 from 'd3';
-import ReactFauxDOM from 'react-faux-dom';
+import { withFauxDOM } from 'react-faux-dom';
 
-class MyReactComponent extends React.Component {
+class Chart extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      dataset: {
-        max: 0
-      }
-    }
 
-    // load data
-    var self = this;
-    d3.csv('data.csv', function(data){
-      var dataset = self.state.dataset;
-
-      dataset['series'] = data.filter(function(d){ return d['Feminino Branca'] && d['Masculino Branca'] }).map(function(d){
-        var result = {
-          'profession': d['Categorias'],
-          'men': parseFloat(d['Masculino Branca'].replace(',', '')),
-          'women': parseFloat(d['Feminino Branca'].replace(',', '')),
-        }
-
-        result.max = Math.max(result.men, result.women);
-        result.min = Math.min(result.men, result.women);
-        result.gap = result.men - result.women;
-
-        dataset.max = Math.max(dataset.max, result.max);
-
-        return result;
-      });
-      self.setState({dataset: dataset});
-    });
+    // bind methods
+    this.renderD3 = this.renderD3.bind(this);
   }
 
+  componentDidUpdate () {
+    this.renderD3()
+  }
 
-  render () {
-    var data = this.state.dataset;
+  render() {
+    return (
+      <div>
+        {this.props.chart}
+      </div>
+    )
+  }
+
+  renderD3 () {
+    var self = this;
+    var data = this.props.data;
 
     var domain = this.props.domain;
     var margin = {top: 20, right: 20, bottom: 30, left: 100}
     var width = 960 - margin.left - margin.right
     var height = 500 - margin.top - margin.bottom
     var color = ["rgb(114,135,144)", "rgb(171,112,128)"];
+    var points = {
+      radius: {
+        higher: 3,
+        lower: 1
+      },
+      opacity: 0.5
+    }
 
-    var node = ReactFauxDOM.createElement('svg')
-
+    var faux = this.props.connectFauxDOM('div', 'chart')
 
     // apply margins
-    var svg = d3.select(node)
+    var svg = d3.select(faux).append('svg')
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
     // return empty node if data is not defined yet
-    if (!data.series) return node.toReact();
-
+    if (!data.series) return;
 
     // define scales
     var scales = {
@@ -72,26 +64,27 @@ class MyReactComponent extends React.Component {
 
     // append data and svg elements
     var binding = svg.selectAll('g').data(data.series);
-
     var enterG = binding.enter().append('g');
 
     // men points
     enterG
       .append('circle')
         .style("fill", color[0])
+        .style("opacity", points.opacity)
         .attr('class', 'men-point')
         .attr('cx', function(d, i) { return scales.x(i); })
         .attr('cy', function(d) { return scales.y(d.men); })
-        .attr('r', function(d) { return d.gap > 0 ? 2 : 1; });
+        .attr('r', function(d) { return d.men > d.women ? points.radius.higher : points.radius.lower ; });
 
     // woman points
     enterG
       .append('circle')
         .style("fill", color[1])
+        .style("opacity", points.opacity)
         .attr('class', 'women-point')
         .attr('cx', function(d, i) { return scales.x(i); })
         .attr('cy', function(d) { return scales.y(d.women); })
-        .attr('r', function(d) { return d.gap < 0 ? 2 : 1 });
+        .attr('r', function(d) { return d.women > d.men ? points.radius.higher : points.radius.lower ; });
 
     // gap line
     enterG
@@ -139,13 +132,13 @@ class MyReactComponent extends React.Component {
         g.select(".domain").remove();
       });
 
-
-    return node.toReact()
   }
 }
 
-MyReactComponent.defaultProps = {
+Chart.defaultProps = {
   chart: 'loading'
 }
 
-export default MyReactComponent;
+const FauxChart = withFauxDOM(Chart);
+
+export default FauxChart;
