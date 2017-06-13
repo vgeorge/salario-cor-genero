@@ -45,33 +45,37 @@ class MyReactComponent extends React.Component {
     var height = 500 - margin.top - margin.bottom
     var color = ["rgb(114,135,144)", "rgb(171,112,128)"];
 
-
-    console.log('data');
-    console.log(data);
-
     var node = ReactFauxDOM.createElement('svg')
 
+
+    // apply margins
     var svg = d3.select(node)
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    // return empty node if data is not defined yet
     if (!data.series) return node.toReact();
 
+
+    // define scales
     var scales = {
       x: d3.scaleLinear().range([0, width]).domain([0, data.series.length]),
       y: d3.scaleLinear().range([height, 0]).domain([0, data.max])
     }
 
+    // sort data
     data.series.sort(function(a,b){
       return d3.ascending(a.men, b.men);
     });
 
+    // append data and svg elements
     var binding = svg.selectAll('g').data(data.series);
 
     var enterG = binding.enter().append('g');
 
+    // men points
     enterG
       .append('circle')
         .style("fill", color[0])
@@ -80,6 +84,7 @@ class MyReactComponent extends React.Component {
         .attr('cy', function(d) { return scales.y(d.men); })
         .attr('r', function(d) { return d.gap > 0 ? 2 : 1; });
 
+    // woman points
     enterG
       .append('circle')
         .style("fill", color[1])
@@ -88,6 +93,7 @@ class MyReactComponent extends React.Component {
         .attr('cy', function(d) { return scales.y(d.women); })
         .attr('r', function(d) { return d.gap < 0 ? 2 : 1 });
 
+    // gap line
     enterG
       .append('path')
         .style("stroke", function(d){ return d.gap > 0 ? color[0] : color[1] })
@@ -96,11 +102,13 @@ class MyReactComponent extends React.Component {
         })
 
 
+    // add y axis
     var axis = d3
       .axisRight(scales.y)
       .ticks(5)
       .tickSize(width);
 
+    // formart axis' ticks
     svg
       .append("g")
       .call(axis)
@@ -110,6 +118,7 @@ class MyReactComponent extends React.Component {
         g.selectAll(".tick:not(:first-of-type) line").attr("stroke", "#777").attr("stroke-dasharray", "2,2");
       });
 
+    // format axis labels
     var axisLabel = d3
       .axisLeft(scales.y)
       .ticks(5)
@@ -120,6 +129,8 @@ class MyReactComponent extends React.Component {
           "currency": ["R$ ", ""]
         }).format("$,.2f")
       );
+
+    // remove unwanted tick lines and domain
     svg
       .append("g")
       .call(axisLabel)
@@ -127,8 +138,6 @@ class MyReactComponent extends React.Component {
         g.selectAll(".tick line").remove();
         g.select(".domain").remove();
       });
-
-
 
 
     return node.toReact()
