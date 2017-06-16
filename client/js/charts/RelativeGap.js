@@ -1,12 +1,15 @@
 import React from "react";
 import * as d3 from "d3";
 import { withFauxDOM } from "react-faux-dom";
+import { withTheme } from "styled-components";
 
 class Chart extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {};
+
+    this.props;
 
     // bind methods
     this.renderD3 = this.renderD3.bind(this);
@@ -86,75 +89,69 @@ class Chart extends React.Component {
     // return empty node if data is not defined yet
     if (!data.series) return;
 
-    // define scales
+    // Define scales
     var scales = {
-      x: d3.scaleLinear().range([0, width]).domain([0, data.series.length]),
-      y: d3.scaleLinear().range([height, 0]).domain([0, data.max])
+      x: d3
+        .scaleBand()
+        .rangeRound([0, width])
+        .padding(0.1)
+        .domain(data.series.map((d, i) => i)),
+      y: d3
+        .scaleLinear()
+        .range([height, 0])
+        .domain([data.relativeGapMin, data.relativeGapMax])
     };
 
     // sort data
     data.series.sort(function(a, b) {
-      return d3.ascending(a.men, b.men);
+      return d3.ascending(a.relativeGap, b.relativeGap);
     });
 
     // append data and svg elements
     var binding = svg.selectAll("g").data(data.series);
     var enterG = binding.enter().append("g");
 
-    // men points
-    enterG
-      .append("circle")
-      .style("opacity", points.opacity)
-      .attr("class", "data point-men")
-      .attr("cx", function(d, i) {
-        return scales.x(i);
-      })
-      .attr("cy", function(d) {
-        return scales.y(d.men);
-      })
-      .attr("r", function(d) {
-        return d.men > d.women ? points.radius.higher : points.radius.lower;
-      });
-    // .on("mouseover", self.handleMouseoverEvent)
-    // .on("mouseout", self.handleMouseoutEvent);
-
     // woman points
     enterG
       .append("circle")
-      .style("opacity", points.opacity)
-      .attr("class", "data point-women")
+      // .style("opacity", points.opacity)
+      // .attr("class", "data point-women")
+      .style("fill", function(d) {
+        return d.relativeGap > 0
+          ? self.props.theme.menColor
+          : self.props.theme.womenColor;
+      })
       .attr("cx", function(d, i) {
         return scales.x(i);
       })
       .attr("cy", function(d) {
-        return scales.y(d.women);
+        return scales.y(d.relativeGap);
       })
       .attr("r", function(d) {
-        return d.women > d.men ? points.radius.higher : points.radius.lower;
+        return 2;
       });
     // .on("mouseover", self.handleMouseoverEvent)
     // .on("mouseout", self.handleMouseoutEvent);
 
-    // gap line
     enterG
       .append("path")
       .style("stroke", function(d) {
-        return d.gap > 0 ? "red" : "blue";
+        return d.relativeGap > 0
+          ? self.props.theme.menColor
+          : self.props.theme.womenColor;
       })
       .attr("d", function(d, i) {
         return (
           "M " +
           scales.x(i) +
           " " +
-          scales.y(d.men) +
+          scales.y(0) +
           " L " +
           scales.x(i) +
           " " +
-          scales.y(d.women)
+          scales.y(d.relativeGap)
         );
       });
-    // .on("mouseover", self.handleMouseoverEvent)
-    // .on("mouseout", self.handleMouseoutEvent);
 
     // add y axis
     var axis = d3.axisRight(scales.y).ticks(5).tickSize(width);
@@ -164,22 +161,13 @@ class Chart extends React.Component {
       g.selectAll("text").remove();
       g.select(".domain").remove();
       g
-        .selectAll(".tick:not(:first-of-type) line")
+        .selectAll(".tick line")
         .attr("stroke", "#777")
         .attr("stroke-dasharray", "2,2");
     });
 
     // format axis labels
-    var axisLabel = d3.axisLeft(scales.y).ticks(5).tickFormat(
-      d3
-        .formatLocale({
-          decimal: ",",
-          thousands: ".",
-          grouping: [3],
-          currency: ["R$ ", ""]
-        })
-        .format("$,.2f")
-    );
+    var axisLabel = d3.axisLeft(scales.y).ticks(5, "%");
 
     // remove unwanted tick lines and domain
     svg.append("g").call(axisLabel).call(function(g) {
@@ -195,4 +183,4 @@ Chart.defaultProps = {
 
 const FauxChart = withFauxDOM(Chart);
 
-export default FauxChart;
+export default withTheme(FauxChart);
