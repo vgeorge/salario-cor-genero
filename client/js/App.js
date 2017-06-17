@@ -42,35 +42,76 @@ class App extends Component {
 
       data["series"] = csvData
         .map(function(d) {
-          return {
+          // get profession and salaries for plotting
+          var result = {
             profession: d["Categorias"],
-            men: parseFloat(d["Masculino Branca"].replace(",", "")),
-            women: parseFloat(d["Feminino Branca"].replace(",", ""))
+            menSalary: parseFloat(d["Masculino Branca"].replace(",", "")),
+            womenSalary: parseFloat(d["Feminino Branca"].replace(",", ""))
           };
+
+          // get available profiles
+          var ranking = [];
+
+          for (let profile of [
+            "Feminino Branca",
+            "Masculino Branca",
+            "Feminino Parda",
+            "Masculino Parda",
+            "Feminino Preta",
+            "Masculino Preta"
+          ]) {
+            if (d[profile]) {
+              ranking.push({
+                profile: profile,
+                salary: parseFloat(d[profile].replace(",", ""))
+              });
+            }
+          }
+
+          // sort ranking
+          ranking = ranking.sort((a, b) => {
+            return a.salary < b.salary;
+          });
+
+          // add relative gaps to each
+          const bestSalary = ranking[0].salary;
+          ranking = ranking.map(a => {
+            a.relativeGap = (a.salary - bestSalary) / bestSalary;
+            return a;
+          });
+
+          // add ranking to result
+          result.ranking = ranking;
+
+          return result;
         })
         .filter(function(d) {
-          return d.women && d.men && (d.men - d.women) / d.women < 1;
+          return (
+            d.womenSalary &&
+            d.menSalary &&
+            (d.menSalary - d.womenSalary) / d.womenSalary < 1
+          );
         })
         .map(function(d) {
           var result = d;
 
           // Collect gaps
 
-          result.absoluteGap = result.men - result.women;
-          result.relativeGap = result.absoluteGap / result.women;
+          result.absoluteGap = result.menSalary - result.womenSalary;
+          result.relativeGap = result.absoluteGap / result.womenSalary;
 
           // Collect domains
 
           data.absoluteMax = Math.max(
-            data.absoluteMax || result.men,
-            result.men,
-            result.women
+            data.absoluteMax || result.menSalary,
+            result.menSalary,
+            result.womenSalary
           );
 
           data.absoluteMin = Math.min(
-            data.absoluteMin || result.men,
-            result.men,
-            result.women
+            data.absoluteMin || result.menSalary,
+            result.menSalary,
+            result.womenSalary
           );
 
           data.relativeGapMax = Math.max(

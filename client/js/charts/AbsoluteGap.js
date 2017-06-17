@@ -72,8 +72,6 @@ class Chart extends React.Component {
       opacity: 0.5
     };
 
-    // console.log(self.props.theme);
-
     var faux = this.props.connectFauxDOM("div", "chart");
 
     // apply margins

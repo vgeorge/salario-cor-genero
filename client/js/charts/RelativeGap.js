@@ -1,7 +1,76 @@
 import React from "react";
 import * as d3 from "d3";
 import { withFauxDOM } from "react-faux-dom";
-import { withTheme } from "styled-components";
+import styled, { withTheme } from "styled-components";
+
+const Tooltip = ({ style, d }) => {
+  var higherSalary;
+  var lowerSalary;
+  var higherSalaryGender;
+  var lowerSalaryGender;
+
+  const brNumber = d3
+    .formatLocale({
+      decimal: ",",
+      thousands: ".",
+      grouping: [3],
+      currency: ["R$ ", ""]
+    })
+    .format("$,.2f");
+  const percentage = d3.format(".0%");
+
+  if (d.menSalary > d.womenSalary) {
+    higherSalary = d.menSalary;
+    higherSalaryGender = "os homens";
+    lowerSalary = d.womenSalary;
+    lowerSalaryGender = "as mulheres";
+  } else {
+    higherSalary = d.womenSalary;
+    higherSalaryGender = "as mulheres";
+    lowerSalary = d.menSalary;
+    lowerSalaryGender = "os homens";
+  }
+
+  return (
+    <div className="tooltip" style={style}>
+      <h3>{d.profession}</h3>
+      <p>
+        Nesta profissão, o salário médio d{higherSalaryGender} é de {" "}
+        {brNumber(higherSalary)} e d{lowerSalaryGender} é de{" "}
+        {brNumber(lowerSalary)}, uma diferença de{" "}
+        {percentage(Math.abs(d.relativeGap))} a mais para {higherSalaryGender}.
+      </p>
+      <p>Ranking de salários, considerando também raça ou cor:</p>
+      <ol>
+        {d.ranking.map((position, i) => {
+          return (
+            <li key={i}>
+              {position.profile}: {brNumber(position.salary)}{" "}
+              {position.relativeGap < 0
+                ? `(${percentage(position.relativeGap)})`
+                : ""}{" "}
+            </li>
+          );
+        })}
+
+      </ol>
+    </div>
+  );
+};
+
+// Tooltip.propTypes = {
+//   content: string,
+//   style: object
+// };
+
+const Wrapper = styled.div`
+  position: relative;
+  display: inline-block;
+  .tooltip {
+    visibility: ${({ hover }) => (hover ? "visible" : "hidden")};
+    -webkit-transition: top .2s ease-out, left .2s ease-out;
+  }
+`;
 
 class Chart extends React.Component {
   constructor(props) {
@@ -23,14 +92,13 @@ class Chart extends React.Component {
   }
 
   render() {
+    const self = this;
+    const { hover } = this.state;
     return (
-      <section className={this.props.className}>
-        <p>
-          {this.state.hover &&
-            this.computeTooltipProps(this.state.hover).content}
-        </p>
+      <Wrapper className="relative-gap-chart" hover={hover}>
+        {hover && <Tooltip key="dois" {...this.computeTooltipProps(hover)} />}
         {this.props.chart}
-      </section>
+      </Wrapper>
     );
   }
 
@@ -48,14 +116,18 @@ class Chart extends React.Component {
   }
 
   handleMouseoutEvent(d) {
-    this.unsetHoverTimeout = setTimeout(() => this.setHover(null), 200);
+    // this.unsetHoverTimeout = setTimeout(() => this.setHover(null), 200);
   }
 
   // TOOLTIP
 
   computeTooltipProps(d) {
     return {
-      content: d.profession
+      style: {
+        top: 100,
+        left: 100
+      },
+      d: d
     };
   }
 
@@ -129,9 +201,9 @@ class Chart extends React.Component {
       })
       .attr("r", function(d) {
         return 2;
-      });
-    // .on("mouseover", self.handleMouseoverEvent)
-    // .on("mouseout", self.handleMouseoutEvent);
+      })
+      .on("mouseover", self.handleMouseoverEvent)
+      .on("mouseout", self.handleMouseoutEvent);
 
     enterG
       .append("path")
@@ -151,7 +223,9 @@ class Chart extends React.Component {
           " " +
           scales.y(d.relativeGap)
         );
-      });
+      })
+      .on("mouseover", self.handleMouseoverEvent)
+      .on("mouseout", self.handleMouseoutEvent);
 
     // add y axis
     var axis = d3.axisRight(scales.y).ticks(5).tickSize(width);
