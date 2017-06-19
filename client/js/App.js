@@ -4,28 +4,11 @@ import { render } from "react-dom";
 import styled from "styled-components";
 import * as d3 from "d3";
 
+import theme from "./constants/theme";
 import ThemedApp from "./containers/ThemedApp";
+
 import AbsoluteGapChart from "./charts/AbsoluteGap";
 import RelativeGapChart from "./charts/RelativeGap";
-
-const theme = {
-  menColor: "rgb(114,135,144)",
-  womenColor: "rgb(171,112,128)",
-  color: "black",
-  border: "lightgrey"
-};
-
-const colors = ["rgb(114,135,144)", "rgb(171,112,128)"];
-
-// const StyledChart = styled(Chart)`
-//   .point-men {
-//     fill: red;
-//   }
-//
-//   .point-women {
-//     fill: green;
-//   }
-// `;
 
 class App extends Component {
   constructor(props) {

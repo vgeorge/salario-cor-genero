@@ -7,13 +7,13 @@ injectGlobal`
   body {
     margin: 0;
     overflow: hidden;
+    background-color: ${({ theme }) => theme.background};
   }
 `;
 
 const Root = styled.div`
-  background-color: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.color};
-  font: 11px sans-serif;
+  font: 'Merriweather Sans",Arial,Helvetica,sans-serif';
   padding: 8px;
 `;
 

@@ -21,39 +21,52 @@ const Tooltip = ({ style, d }) => {
 
   if (d.menSalary > d.womenSalary) {
     higherSalary = d.menSalary;
-    higherSalaryGender = "os homens";
+    higherSalaryGender = "Homens";
     lowerSalary = d.womenSalary;
-    lowerSalaryGender = "as mulheres";
+    lowerSalaryGender = "Mulheres";
   } else {
     higherSalary = d.womenSalary;
-    higherSalaryGender = "as mulheres";
+    higherSalaryGender = "Mulheres";
     lowerSalary = d.menSalary;
-    lowerSalaryGender = "os homens";
+    lowerSalaryGender = "Homens";
   }
 
   return (
     <div className="tooltip" style={style}>
-      <h3>{d.profession}</h3>
-      <p>
-        Nesta profissão, o salário médio d{higherSalaryGender} é de {" "}
-        {brNumber(higherSalary)} e d{lowerSalaryGender} é de{" "}
-        {brNumber(lowerSalary)}, uma diferença de{" "}
-        {percentage(Math.abs(d.relativeGap))} a mais para {higherSalaryGender}.
-      </p>
-      <p>Ranking de salários, considerando também raça ou cor:</p>
-      <ol>
-        {d.ranking.map((position, i) => {
-          return (
-            <li key={i}>
-              {position.profile}: {brNumber(position.salary)}{" "}
-              {position.relativeGap < 0
-                ? `(${percentage(position.relativeGap)})`
-                : ""}{" "}
-            </li>
-          );
-        })}
+      <div id="main">
+        <h3>{d.profession}</h3>
+        Salário médio por gênero:
+        <ul>
+          <li>
+            Homens: {brNumber(d.menSalary)}
+          </li>
+          <li>
+            Mulher: {brNumber(d.womenSalary)}
+          </li>
+        </ul>
 
-      </ol>
+        <ul>
+          <li>
+            {higherSalaryGender} ganham {percentage(Math.abs(d.relativeGap))} a
+            mais
+          </li>
+        </ul>
+      </div>
+      <div id="ranking">
+        <p>Ranking por gênero e raça:</p>
+        <ol>
+          {d.ranking.map((position, i) => {
+            return (
+              <li key={i}>
+                {position.profile}: {brNumber(position.salary)}{" "}
+                {position.relativeGap < 0
+                  ? `(${percentage(position.relativeGap)})`
+                  : ""}{" "}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </div>
   );
 };
@@ -64,11 +77,36 @@ const Tooltip = ({ style, d }) => {
 // };
 
 const Wrapper = styled.div`
-  position: relative;
   display: inline-block;
   .tooltip {
     visibility: ${({ hover }) => (hover ? "visible" : "hidden")};
     -webkit-transition: top .2s ease-out, left .2s ease-out;
+
+    #main {
+      position: absolute;
+      padding: 10px 15px 10px 15px;
+      left: 500px;
+      top: 200px;
+      width: 200px;
+      background-color: ${({ theme }) => theme.background};
+    }
+
+    #ranking {
+      position: absolute;
+      padding: 10px 15px 10px 15px;
+      left: 150px;
+      top: 250px;
+      width: 200px;
+      background-color: ${({ theme }) => theme.background};
+    }
+
+
+
+    h3 {
+      text-align: center;
+      color: ${({ theme }) => theme.infobox.title};
+      // color: white;
+    }
   }
 `;
 
@@ -168,10 +206,7 @@ class Chart extends React.Component {
         .rangeRound([0, width])
         .padding(0.1)
         .domain(data.series.map((d, i) => i)),
-      y: d3
-        .scaleLinear()
-        .range([height, 0])
-        .domain([data.relativeGapMin, data.relativeGapMax])
+      y: d3.scaleLinear().range([height, 0]).domain([0, data.relativeGapMax])
     };
 
     // sort data
@@ -197,7 +232,7 @@ class Chart extends React.Component {
         return scales.x(i);
       })
       .attr("cy", function(d) {
-        return scales.y(d.relativeGap);
+        return scales.y(Math.abs(d.relativeGap));
       })
       .attr("r", function(d) {
         return 2;
@@ -221,7 +256,7 @@ class Chart extends React.Component {
           " L " +
           scales.x(i) +
           " " +
-          scales.y(d.relativeGap)
+          scales.y(Math.abs(d.relativeGap))
         );
       })
       .on("mouseover", self.handleMouseoverEvent)
