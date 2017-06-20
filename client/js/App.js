@@ -1,21 +1,30 @@
 import "babel-polyfill";
 import React, { Component } from "react";
 import { render } from "react-dom";
-import styled from "styled-components";
 import * as d3 from "d3";
 
+import styled from "styled-components";
+import { Flex, Box } from "grid-styled";
 import theme from "./constants/theme";
 import ThemedApp from "./containers/ThemedApp";
 
-import AbsoluteGapChart from "./charts/AbsoluteGap";
-import RelativeGapChart from "./charts/RelativeGap";
+import Chart from "./components/Chart";
+import Infobox from "./components/Infobox";
+
+const Wrapper = styled.div`
+  margin-left: 100px;
+  margin-top: 50px;
+`;
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      data: {}
+      data: {
+        numberOfProfessions: 0,
+        professionsWomanEarnLess: 0
+      }
     };
 
     // load data
@@ -107,6 +116,9 @@ class App extends Component {
             result.relativeGap
           );
 
+          data.numberOfProfessions++;
+          if (result.relativeGap > 0) data.professionsWomanEarnLess++;
+
           return result;
         });
 
@@ -117,11 +129,21 @@ class App extends Component {
   render() {
     return (
       <ThemedApp theme={theme}>
-        <div>
-          <h3>Salário mensal: Homens x Mulheres</h3>
-          <p>Destaque uma profissão: </p>
-          <RelativeGapChart data={this.state.data} />
-        </div>
+        <Wrapper>
+          <h1>Diferenças salariais entre homens e mulheres</h1>
+          <p>
+            Segundo dados do IBGE, as mulheres
+            recebem salário menor do que homens em{" "}
+            {this.state.data.professionsWomanEarnLess}{" "}
+            de {this.state.data.numberOfProfessions} profissões monitoradas.
+          </p>
+          <Chart data={this.state.data} />
+          <Infobox data={this.state.data} />
+          <p>
+            Esta visualização faz parte do Especial Trabalho, série de
+            reportagens da Genêro e Número
+          </p>
+        </Wrapper>
       </ThemedApp>
     );
   }

@@ -16,6 +16,7 @@ const theme = {
   menColor: colors.slategray,
   womenColor: colors.turkishrose,
   infobox: {
+    background: colors.swisscoffee,
     title: colors.hippieblue
   },
   color: "black",

@@ -13,7 +13,7 @@ injectGlobal`
 
 const Root = styled.div`
   color: ${({ theme }) => theme.color};
-  font: 'Merriweather Sans",Arial,Helvetica,sans-serif';
+  font-family: Merriweather sans, sans-serif;
   padding: 8px;
 `;
 

@@ -1,112 +1,44 @@
 import React from "react";
+import styled, { withTheme } from "styled-components";
+import { transparentize } from "polished";
 import * as d3 from "d3";
 import { withFauxDOM } from "react-faux-dom";
-import styled, { withTheme } from "styled-components";
-
-const Tooltip = ({ style, d }) => {
-  var higherSalary;
-  var lowerSalary;
-  var higherSalaryGender;
-  var lowerSalaryGender;
-
-  const brNumber = d3
-    .formatLocale({
-      decimal: ",",
-      thousands: ".",
-      grouping: [3],
-      currency: ["R$ ", ""]
-    })
-    .format("$,.2f");
-  const percentage = d3.format(".0%");
-
-  if (d.menSalary > d.womenSalary) {
-    higherSalary = d.menSalary;
-    higherSalaryGender = "Homens";
-    lowerSalary = d.womenSalary;
-    lowerSalaryGender = "Mulheres";
-  } else {
-    higherSalary = d.womenSalary;
-    higherSalaryGender = "Mulheres";
-    lowerSalary = d.menSalary;
-    lowerSalaryGender = "Homens";
-  }
-
-  return (
-    <div className="tooltip" style={style}>
-      <div id="main">
-        <h3>{d.profession}</h3>
-        Salário médio por gênero:
-        <ul>
-          <li>
-            Homens: {brNumber(d.menSalary)}
-          </li>
-          <li>
-            Mulher: {brNumber(d.womenSalary)}
-          </li>
-        </ul>
-
-        <ul>
-          <li>
-            {higherSalaryGender} ganham {percentage(Math.abs(d.relativeGap))} a
-            mais
-          </li>
-        </ul>
-      </div>
-      <div id="ranking">
-        <p>Ranking por gênero e raça:</p>
-        <ol>
-          {d.ranking.map((position, i) => {
-            return (
-              <li key={i}>
-                {position.profile}: {brNumber(position.salary)}{" "}
-                {position.relativeGap < 0
-                  ? `(${percentage(position.relativeGap)})`
-                  : ""}{" "}
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-    </div>
-  );
-};
-
-// Tooltip.propTypes = {
-//   content: string,
-//   style: object
-// };
+import Tooltip from "./Tooltip.js";
 
 const Wrapper = styled.div`
+  position: relative;
   display: inline-block;
+
+  .data {
+    opacity: ${({ hover }) => (hover && hover.d ? 0.25 : 1)};
+  }
+
+  ${({ hover }) =>
+    hover &&
+    hover.i >= 0 &&
+    `.bar--x-${hover.i} {
+    opacity: 1;
+    -webkit-transition: opacity .2s ease-in;
+  }`}
+
   .tooltip {
+    pointer-events: none;
+    position: absolute;
+    z-index: 10;
+    display: inline-block;
+    border: solid 1px ${({ theme }) => theme.background};
+    border-radius: 2px;
+    padding: 10px;
+    background-color: ${({ theme }) => theme.infobox.background};
+    text-align: center;
+    color: ${({ hover, theme }) =>
+      hover && hover.d && hover.d.relativeGap > 0
+        ? theme.menColor
+        : theme.womenColor};;
+
+
     visibility: ${({ hover }) => (hover ? "visible" : "hidden")};
     -webkit-transition: top .2s ease-out, left .2s ease-out;
-
-    #main {
-      position: absolute;
-      padding: 10px 15px 10px 15px;
-      left: 500px;
-      top: 200px;
-      width: 200px;
-      background-color: ${({ theme }) => theme.background};
-    }
-
-    #ranking {
-      position: absolute;
-      padding: 10px 15px 10px 15px;
-      left: 150px;
-      top: 250px;
-      width: 200px;
-      background-color: ${({ theme }) => theme.background};
-    }
-
-
-
-    h3 {
-      text-align: center;
-      color: ${({ theme }) => theme.infobox.title};
-      // color: white;
-    }
   }
 `;
 
@@ -134,7 +66,9 @@ class Chart extends React.Component {
     const { hover } = this.state;
     return (
       <Wrapper className="relative-gap-chart" hover={hover}>
-        {hover && <Tooltip key="dois" {...this.computeTooltipProps(hover)} />}
+        {hover &&
+          hover.d &&
+          <Tooltip key="2" {...this.computeTooltipProps(hover)} />}
         {this.props.chart}
       </Wrapper>
     );
@@ -142,31 +76,35 @@ class Chart extends React.Component {
 
   // MOUSE EVENTS
 
-  setHover(d) {
+  setHover(d, i) {
     this.setState({
-      hover: d
+      hover: { d, i }
     });
   }
 
-  handleMouseoverEvent(d) {
+  handleMouseoverEvent(d, i) {
     clearTimeout(this.unsetHoverTimeout);
-    this.setHover(d);
+    this.setHover(d, i);
   }
 
   handleMouseoutEvent(d) {
-    // this.unsetHoverTimeout = setTimeout(() => this.setHover(null), 200);
+    this.unsetHoverTimeout = setTimeout(() => this.setHover(null), 200);
   }
 
   // TOOLTIP
 
-  computeTooltipProps(d) {
-    return {
+  computeTooltipProps(hover) {
+    var result = {
       style: {
-        top: 100,
-        left: 100
+        width: 250,
+        top: this.scales.y(Math.abs(hover.d.relativeGap)) - 15,
+        left: this.scales.x(hover.i) + (hover.d.relativeGap > 0 ? -180 : +110)
       },
-      d: d
+      d: hover.d,
+      i: hover.i
     };
+
+    return result;
   }
 
   renderD3() {
@@ -176,13 +114,14 @@ class Chart extends React.Component {
     var domain = this.props.domain;
     var margin = { top: 20, right: 20, bottom: 30, left: 100 };
     var width = 960 - margin.left - margin.right;
-    var height = 500 - margin.top - margin.bottom;
+    const height = 500 - margin.top - margin.bottom;
+    this.height = height;
     var points = {
       radius: {
         higher: 3,
         lower: 1
       },
-      opacity: 0.5
+      opacity: 0.3
     };
 
     var faux = this.props.connectFauxDOM("div", "chart");
@@ -200,7 +139,7 @@ class Chart extends React.Component {
     if (!data.series) return;
 
     // Define scales
-    var scales = {
+    const scales = {
       x: d3
         .scaleBand()
         .rangeRound([0, width])
@@ -208,6 +147,7 @@ class Chart extends React.Component {
         .domain(data.series.map((d, i) => i)),
       y: d3.scaleLinear().range([height, 0]).domain([0, data.relativeGapMax])
     };
+    this.scales = scales;
 
     // sort data
     data.series.sort(function(a, b) {
@@ -221,8 +161,7 @@ class Chart extends React.Component {
     // woman points
     enterG
       .append("circle")
-      // .style("opacity", points.opacity)
-      // .attr("class", "data point-women")
+      .attr("class", (d, i) => `data bar--x-${i}`)
       .style("fill", function(d) {
         return d.relativeGap > 0
           ? self.props.theme.menColor
@@ -237,11 +176,12 @@ class Chart extends React.Component {
       .attr("r", function(d) {
         return 2;
       })
-      .on("mouseover", self.handleMouseoverEvent)
-      .on("mouseout", self.handleMouseoutEvent);
+      .on("mouseover", self.handleMouseoverEvent);
+    // .on("mouseout", self.handleMouseoutEvent);
 
     enterG
       .append("path")
+      .attr("class", (d, i) => `data bar--x-${i}`)
       .style("stroke", function(d) {
         return d.relativeGap > 0
           ? self.props.theme.menColor
@@ -259,11 +199,11 @@ class Chart extends React.Component {
           scales.y(Math.abs(d.relativeGap))
         );
       })
-      .on("mouseover", self.handleMouseoverEvent)
-      .on("mouseout", self.handleMouseoutEvent);
+      .on("mouseover", self.handleMouseoverEvent);
+    // .on("mouseout", self.handleMouseoutEvent);
 
     // add y axis
-    var axis = d3.axisRight(scales.y).ticks(5).tickSize(width);
+    var axis = d3.axisRight(scales.y).ticks(6).tickSize(width);
 
     // formart axis' ticks
     svg.append("g").call(axis).call(function(g) {
