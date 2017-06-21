@@ -1,7 +1,7 @@
 import "babel-polyfill";
 import React, { Component } from "react";
 import { render } from "react-dom";
-import * as d3 from "d3";
+import { csv, format } from "d3";
 
 import styled from "styled-components";
 import { Flex, Box } from "grid-styled";
@@ -12,8 +12,6 @@ import Chart from "./components/Chart";
 import Infobox from "./components/Infobox";
 
 const Wrapper = styled.div`
-  margin-left: 100px;
-  margin-top: 50px;
 `;
 
 class App extends Component {
@@ -32,7 +30,7 @@ class App extends Component {
 
     // load data
     var self = this;
-    d3.csv("data.csv", function(csvData) {
+    csv("data.csv", function(csvData) {
       var data = self.state.data;
 
       data["series"] = csvData
@@ -139,10 +137,12 @@ class App extends Component {
         <Wrapper>
           <h1>Diferenças salariais entre homens e mulheres</h1>
           <p>
-            Mulheres
-            ganham menos do que homens em{" "}
+            Segundo o IBGE, homens ganham mais em {" "}
             {this.state.data.professionsWomanEarnLess}{" "}
-            de {this.state.data.numberOfProfessions} profissões, segundo o IBGE.
+            de {this.state.data.numberOfProfessions} ({format(".0%")(
+              this.state.data.professionsWomanEarnLess /
+                this.state.data.numberOfProfessions
+            )}) das profissões pesquisadas.
           </p>
           <Chart data={this.state.data} onChange={this._changeHover} />
           <Infobox data={this.state.data} hover={this.state.hover} />

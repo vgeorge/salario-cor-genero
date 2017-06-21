@@ -22,20 +22,6 @@ const Wrapper = styled.div`
   }`}
 
   .tooltip {
-    pointer-events: none;
-    position: absolute;
-    z-index: 10;
-    display: inline-block;
-    border: solid 1px ${({ theme }) => theme.background};
-    border-radius: 2px;
-    padding: 10px;
-    background-color: ${({ theme }) => theme.infobox.background};
-    text-align: center;
-    color: ${({ hover, theme }) =>
-      hover && hover.d && hover.d.relativeGap > 0
-        ? theme.menColor
-        : theme.womenColor};;
-
 
     visibility: ${({ hover }) => (hover ? "visible" : "hidden")};
     -webkit-transition: top .2s ease-out, left .2s ease-out;
@@ -96,9 +82,8 @@ class Chart extends React.Component {
   computeTooltipProps(hover) {
     var result = {
       style: {
-        width: 250,
-        top: this.scales.y(Math.abs(hover.d.relativeGap)) - 15,
-        left: this.scales.x(hover.i) + (hover.d.relativeGap > 0 ? -180 : +110)
+        top: this.scales.y(Math.abs(hover.d.relativeGap)) - 100,
+        left: this.scales.x(hover.i) + (hover.d.relativeGap > 0 ? -180 : +60)
       },
       d: hover.d,
       i: hover.i
@@ -113,7 +98,7 @@ class Chart extends React.Component {
 
     var domain = this.props.domain;
     var margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    var width = 960 - margin.left - margin.right;
+    var width = window.innerWidth - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
     this.height = height;
     var points = {
@@ -203,7 +188,7 @@ class Chart extends React.Component {
     // .on("mouseout", self.handleMouseoutEvent);
 
     // add y axis
-    var axis = d3.axisRight(scales.y).ticks(6).tickSize(width);
+    var axis = d3.axisRight(scales.y).ticks(3).tickSize(width);
 
     // formart axis' ticks
     svg.append("g").call(axis).call(function(g) {

@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
+import styled from "styled-components";
 
 import brCurrency from "../helpers/brCurrency";
+
+const Wrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
 
 class Infobox extends Component {
   constructor(props) {
@@ -11,24 +17,9 @@ class Infobox extends Component {
   render() {
     const { hover } = this.props;
     return (
-      <div>
-        <p>Profissão: {hover && hover.d && hover.d.profession}</p>
-        {hover &&
-          hover.d &&
-          <div>
-            <h3>
-              Ranking por gênero e raça:
-            </h3>
-            {hover.d.ranking.map((d, i) => {
-              return (
-                <div key={i + 1}>
-                  {i}: {d.profile} {brCurrency(d.salary)}
-                </div>
-              );
-            })}
-          </div>}
-
-      </div>
+      <Wrapper>
+        <p>Saiba mais na reportagem: "Título da Reportagem"</p>
+      </Wrapper>
     );
   }
 }
