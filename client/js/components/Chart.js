@@ -77,9 +77,9 @@ class Chart extends React.Component {
   // MOUSE EVENTS
 
   setHover(d, i) {
-    this.setState({
-      hover: { d, i }
-    });
+    const hover = { d, i };
+    this.setState({ hover });
+    this.props.onChange(hover);
   }
 
   handleMouseoverEvent(d, i) {
@@ -112,7 +112,7 @@ class Chart extends React.Component {
     var data = this.props.data;
 
     var domain = this.props.domain;
-    var margin = { top: 20, right: 20, bottom: 30, left: 100 };
+    var margin = { top: 20, right: 20, bottom: 30, left: 50 };
     var width = 960 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
     this.height = height;
@@ -139,12 +139,12 @@ class Chart extends React.Component {
     if (!data.series) return;
 
     // Define scales
+    const axisXmargin = 30;
     const scales = {
       x: d3
-        .scaleBand()
-        .rangeRound([0, width])
-        .padding(0.1)
-        .domain(data.series.map((d, i) => i)),
+        .scaleLinear()
+        .range([axisXmargin, width - axisXmargin])
+        .domain([0, data.series.length]),
       y: d3.scaleLinear().range([height, 0]).domain([0, data.relativeGapMax])
     };
     this.scales = scales;
@@ -217,6 +217,26 @@ class Chart extends React.Component {
 
     // format axis labels
     var axisLabel = d3.axisLeft(scales.y).ticks(5, "%");
+
+    svg
+      .append("g")
+      .append("text")
+      .style("fill", self.props.theme.menColor)
+      .attr("class", "x label")
+      .attr("text-anchor", "end")
+      .attr("x", scales.x(data.series.length - 1))
+      .attr("y", height + margin.right + 5)
+      .text("Homens recebem mais →");
+
+    svg
+      .append("g")
+      .append("text")
+      .style("fill", self.props.theme.womenColor)
+      .attr("class", "x label")
+      .attr("text-anchor", "begin")
+      .attr("x", scales.x(0))
+      .attr("y", height + margin.right + 5)
+      .text("← Mulheres recebem mais");
 
     // remove unwanted tick lines and domain
     svg.append("g").call(axisLabel).call(function(g) {

@@ -7,14 +7,6 @@ const Tooltip = ({ style, d }) => {
   var higherSalaryGender;
   var lowerSalaryGender;
 
-  const brNumber = d3
-    .formatLocale({
-      decimal: ",",
-      thousands: ".",
-      grouping: [3],
-      currency: ["R$ ", ""]
-    })
-    .format("$,.2f");
   const percentage = d3.format(".0%");
 
   if (d.menSalary > d.womenSalary) {

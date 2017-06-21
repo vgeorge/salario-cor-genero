@@ -20,6 +20,9 @@ class App extends Component {
   constructor(props) {
     super(props);
 
+    // bind methods
+    this._changeHover = this._changeHover.bind(this);
+
     this.state = {
       data: {
         numberOfProfessions: 0,
@@ -37,20 +40,20 @@ class App extends Component {
           // get profession and salaries for plotting
           var result = {
             profession: d["Categorias"],
-            menSalary: parseFloat(d["Masculino Branca"].replace(",", "")),
-            womenSalary: parseFloat(d["Feminino Branca"].replace(",", ""))
+            menSalary: parseFloat(d["Homens brancos"].replace(",", "")),
+            womenSalary: parseFloat(d["Mulheres brancas"].replace(",", ""))
           };
 
           // get available profiles
           var ranking = [];
 
           for (let profile of [
-            "Feminino Branca",
-            "Masculino Branca",
-            "Feminino Parda",
-            "Masculino Parda",
-            "Feminino Preta",
-            "Masculino Preta"
+            "Mulheres brancas",
+            "Homens brancos",
+            "Mulheres pardas",
+            "Homens pardos",
+            "Mulheres pretas",
+            "Homens pretas"
           ]) {
             if (d[profile]) {
               ranking.push({
@@ -81,7 +84,7 @@ class App extends Component {
           return (
             d.womenSalary &&
             d.menSalary &&
-            (d.menSalary - d.womenSalary) / d.womenSalary < 1
+            (d.menSalary - d.womenSalary) / d.womenSalary < 2
           );
         })
         .map(function(d) {
@@ -126,23 +129,23 @@ class App extends Component {
     });
   }
 
+  _changeHover(hover) {
+    this.setState({ hover });
+  }
+
   render() {
     return (
       <ThemedApp theme={theme}>
         <Wrapper>
           <h1>Diferenças salariais entre homens e mulheres</h1>
           <p>
-            Segundo dados do IBGE, as mulheres
-            recebem salário menor do que homens em{" "}
+            Mulheres
+            ganham menos do que homens em{" "}
             {this.state.data.professionsWomanEarnLess}{" "}
-            de {this.state.data.numberOfProfessions} profissões monitoradas.
+            de {this.state.data.numberOfProfessions} profissões, segundo o IBGE.
           </p>
-          <Chart data={this.state.data} />
-          <Infobox data={this.state.data} />
-          <p>
-            Esta visualização faz parte do Especial Trabalho, série de
-            reportagens da Genêro e Número
-          </p>
+          <Chart data={this.state.data} onChange={this._changeHover} />
+          <Infobox data={this.state.data} hover={this.state.hover} />
         </Wrapper>
       </ThemedApp>
     );
