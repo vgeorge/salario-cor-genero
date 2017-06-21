@@ -139,10 +139,12 @@ class App extends Component {
           <p>
             Segundo o IBGE, homens ganham mais em {" "}
             {this.state.data.professionsWomanEarnLess}{" "}
-            de {this.state.data.numberOfProfessions} ({format(".0%")(
+            de {this.state.data.numberOfProfessions} profissões pesquisadas ({format(
+              ".0%"
+            )(
               this.state.data.professionsWomanEarnLess /
                 this.state.data.numberOfProfessions
-            )}) das profissões pesquisadas.
+            )}).
           </p>
           <Chart data={this.state.data} onChange={this._changeHover} />
           <Infobox data={this.state.data} hover={this.state.hover} />
