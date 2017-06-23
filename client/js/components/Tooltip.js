@@ -1,7 +1,7 @@
 import React from "react";
 import { format } from "d3";
 import styled from "styled-components";
-import brNumber from "../helpers/brCurrency.js";
+import brCurrency from "../helpers/brCurrency.js";
 
 const Wrapper = styled.div`
   pointer-events: none;
@@ -21,7 +21,11 @@ const Wrapper = styled.div`
     font-size: 13px;
   }
 
-  h3, p {
+  ol {
+    padding: 0 10px 0 10px
+  }
+
+  h3, p, li {
     font-size: 10px;
   }
 
@@ -63,17 +67,32 @@ const Tooltip = ({ style, d }) => {
       <h2>
         {d.profession}
       </h2>
+      {d.ranking &&
+        <div>
+          <h3>
+            Ranking por gênero e cor
+          </h3>
+          <ol>
+            {d.ranking.map((d, i) => {
+              return (
+                <li key={i + 1}>
+                  {brCurrency(d.salary)} {d.profile}
+                </li>
+              );
+            })}
+          </ol>
+        </div>}
       <h3>
-        Salário médio
+        Salário médio sem distinção de cor
       </h3>
       <p className="salary men">
-        Homens: {brNumber(d.menSalary)}
+        Homens: {brCurrency(d.menSalary)}
       </p>
       <p className="salary women">
-        Mulheres: {brNumber(d.womenSalary)}
+        Mulheres: {brCurrency(d.womenSalary)}
       </p>
       <h3 className="salary">
-        Diferença: {brNumber(Math.abs(d.absoluteGap))}
+        Diferença: {brCurrency(Math.abs(d.absoluteGap))}
       </h3>
       <h2 className="highlight {d.absoluteGap > 0 ? 'men' : 'women'}">
         {higherSalaryGender} ganham {percentage(Math.abs(d.relativeGap))} mais

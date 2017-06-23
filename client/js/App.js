@@ -34,24 +34,33 @@ class App extends Component {
       var data = self.state.data;
 
       data["series"] = csvData
+        .filter(function(d) {
+          return (
+            d["Masculino, Todas as Cores"] && d["Feminino, Todas as Cores"]
+          );
+        })
         .map(function(d) {
           // get profession and salaries for plotting
           var result = {
-            profession: d["Categorias"],
-            menSalary: parseFloat(d["Homens brancos"].replace(",", "")),
-            womenSalary: parseFloat(d["Mulheres brancas"].replace(",", ""))
+            profession: d["Profissão"],
+            menSalary: parseFloat(
+              d["Masculino, Todas as Cores"].replace(",", "")
+            ),
+            womenSalary: parseFloat(
+              d["Feminino, Todas as Cores"].replace(",", "")
+            )
           };
 
           // get available profiles
           var ranking = [];
 
           for (let profile of [
-            "Mulheres brancas",
-            "Homens brancos",
-            "Mulheres pardas",
-            "Homens pardos",
-            "Mulheres pretas",
-            "Homens pretas"
+            "Feminino, Cor Branca",
+            "Masculino, Cor Branca",
+            "Feminino, Cor Parda",
+            "Masculino, Cor Parda",
+            "Feminino, Cor Preta",
+            "Masculino, Cor Preta"
           ]) {
             if (d[profile]) {
               ranking.push({
@@ -60,6 +69,8 @@ class App extends Component {
               });
             }
           }
+
+          if (ranking.length == 0) return result;
 
           // sort ranking
           ranking = ranking.sort((a, b) => {
@@ -78,13 +89,13 @@ class App extends Component {
 
           return result;
         })
-        .filter(function(d) {
-          return (
-            d.womenSalary &&
-            d.menSalary &&
-            (d.menSalary - d.womenSalary) / d.womenSalary < 2
-          );
-        })
+        // .filter(function(d) {
+        //   return (
+        //     d.womenSalary &&
+        //     d.menSalary &&
+        //     (d.menSalary - d.womenSalary) / d.womenSalary < 2
+        //   );
+        // })
         .map(function(d) {
           var result = d;
 

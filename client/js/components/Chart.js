@@ -167,6 +167,7 @@ class Chart extends React.Component {
     enterG
       .append("path")
       .attr("class", (d, i) => `data bar--x-${i}`)
+      .style("stroke-width", 3)
       .style("stroke", function(d) {
         return d.relativeGap > 0
           ? self.props.theme.menColor
