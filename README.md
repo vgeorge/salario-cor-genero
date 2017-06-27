@@ -1,4 +1,4 @@
-> [Visualization of pay gap between gender and race in Brazil, according to IBGE data.](vgeorge.github.io/salario-cor-genero)
+> [Visualization of pay gap between gender and race in Brazil, according to IBGE data.](https://vgeorge.github.io/salario-cor-genero)
 
 # References
 
