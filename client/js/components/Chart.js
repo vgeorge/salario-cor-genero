@@ -36,6 +36,15 @@ class Chart extends React.Component {
 
     this.props;
 
+    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+    this.chartProperties = {
+      margin: margin,
+      width: window.innerWidth - margin.left - margin.right,
+      height: 500 - margin.top - margin.bottom,
+      xBuffer: 50,
+      circleRadius: 5
+    };
+
     // bind methods
     this.renderD3 = this.renderD3.bind(this);
     this.render = this.render.bind(this);
@@ -94,20 +103,18 @@ class Chart extends React.Component {
 
   renderD3() {
     var self = this;
-    var data = this.props.data;
+    var { data, domain } = this.props;
 
-    var domain = this.props.domain;
-    var margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    var width = window.innerWidth - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
+    // Chart rendering parameters
+    const {
+      margin,
+      width,
+      height,
+      xBuffer,
+      circleRadius
+    } = self.chartProperties;
+
     this.height = height;
-    var points = {
-      radius: {
-        higher: 3,
-        lower: 1
-      },
-      opacity: 0.3
-    };
 
     var faux = this.props.connectFauxDOM("div", "chart");
 
@@ -124,11 +131,11 @@ class Chart extends React.Component {
     if (!data.series) return;
 
     // Define scales
-    const axisXmargin = 30;
+
     const scales = {
       x: d3
         .scaleLinear()
-        .range([axisXmargin, width - axisXmargin])
+        .range([xBuffer, width - xBuffer])
         .domain([0, data.series.length]),
       y: d3.scaleLinear().range([height, 0]).domain([0, data.relativeGapMax])
     };

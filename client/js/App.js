@@ -1,7 +1,7 @@
 import "babel-polyfill";
 import React, { Component } from "react";
 import { render } from "react-dom";
-import { csv, format } from "d3";
+import { csv, format, ascending, max } from "d3";
 
 import styled from "styled-components";
 import { Flex, Box } from "grid-styled";
@@ -30,18 +30,13 @@ class App extends Component {
 
     // load data
     var self = this;
-    csv("data.csv", function(csvData) {
+    csv("data-rais.csv", function(csvData) {
       var data = self.state.data;
 
       data["series"] = csvData
-        .filter(function(d) {
-          return (
-            d["Masculino, Todas as Cores"] && d["Feminino, Todas as Cores"]
-          );
-        })
         .map(function(d) {
           // get profession and salaries for plotting
-          var result = {
+          return {
             profession: d["Profissão"],
             menSalary: parseFloat(
               d["Masculino, Todas as Cores"].replace(",", "")
@@ -50,8 +45,20 @@ class App extends Component {
               d["Feminino, Todas as Cores"].replace(",", "")
             )
           };
+        })
+        .filter(function(d) {
+          return (
+            d.menSalary && d.menSalary > 0 && d.womenSalary && d.womenSalary > 0
+          );
+        })
+        .map(function(d) {
+          // Calculate absolute and relative gap
+          d.absoluteGap = d.menSalary - d.womenSalary;
+          d.relativeGap = d.absoluteGap / Math.min(d.menSalary, d.womenSalary);
 
-          // get available profiles
+          if (d.absoluteGap > 0) data.professionsWomanEarnLess++;
+
+          // Make racial ranking, if data is available
           var ranking = [];
 
           for (let profile of [
@@ -65,12 +72,13 @@ class App extends Component {
             if (d[profile]) {
               ranking.push({
                 profile: profile,
-                salary: parseFloat(d[profile].replace(",", ""))
+                salary: parseFloat(d[profile].replace(",", "")),
+                gender: profile.split(",")[0]
               });
             }
           }
 
-          if (ranking.length == 0) return result;
+          if (ranking.length == 0) return d;
 
           // sort ranking
           ranking = ranking.sort((a, b) => {
@@ -84,55 +92,20 @@ class App extends Component {
             return a;
           });
 
-          // add ranking to result
-          result.ranking = ranking;
+          // add ranking to d
+          d.ranking = ranking;
 
-          return result;
+          return d;
         })
-        // .filter(function(d) {
-        //   return (
-        //     d.womenSalary &&
-        //     d.menSalary &&
-        //     (d.menSalary - d.womenSalary) / d.womenSalary < 2
-        //   );
-        // })
-        .map(function(d) {
-          var result = d;
-
-          // Collect gaps
-
-          result.absoluteGap = result.menSalary - result.womenSalary;
-          result.relativeGap = result.absoluteGap / result.womenSalary;
-
-          // Collect domains
-
-          data.absoluteMax = Math.max(
-            data.absoluteMax || result.menSalary,
-            result.menSalary,
-            result.womenSalary
-          );
-
-          data.absoluteMin = Math.min(
-            data.absoluteMin || result.menSalary,
-            result.menSalary,
-            result.womenSalary
-          );
-
-          data.relativeGapMax = Math.max(
-            data.relativeGapMax || result.relativeGap,
-            result.relativeGap
-          );
-
-          data.relativeGapMin = Math.min(
-            data.relativeGapMin || result.relativeGap,
-            result.relativeGap
-          );
-
-          data.numberOfProfessions++;
-          if (result.relativeGap > 0) data.professionsWomanEarnLess++;
-
-          return result;
+        .sort(function(a, b) {
+          return ascending(a.relativeGap, b.relativeGap);
         });
+
+      data.numberOfProfessions = data.series.length;
+
+      data.relativeGapMax = max(data.series, function(d) {
+        return Math.abs(d.relativeGap);
+      });
 
       self.setState({ data: data });
     });
