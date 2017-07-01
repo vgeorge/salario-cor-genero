@@ -2,6 +2,7 @@ import React from "react";
 import styled, { withTheme } from "styled-components";
 import { transparentize } from "polished";
 import * as d3 from "d3";
+import d3Fisheye from "../helpers/d3-fisheye.js";
 import { withFauxDOM } from "react-faux-dom";
 import Tooltip from "./Tooltip.js";
 
@@ -32,33 +33,34 @@ class Chart extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
-
-    this.props;
-
     const margin = { top: 20, right: 20, bottom: 30, left: 50 };
     this.chartProperties = {
       margin: margin,
       width: window.innerWidth - margin.left - margin.right,
       height: 500 - margin.top - margin.bottom,
       xBuffer: 50,
-      circleRadius: 5
+      circleRadius: 2,
+      fisheye: d3Fisheye.circular().radius(50).distortion(2)
     };
 
-    // bind methods
+    // Bindings
     this.renderD3 = this.renderD3.bind(this);
-    this.render = this.render.bind(this);
+    this.updateD3 = this.updateD3.bind(this);
     this.handleMouseoverEvent = this.handleMouseoverEvent.bind(this);
     this.handleMouseoutEvent = this.handleMouseoutEvent.bind(this);
   }
 
-  componentDidUpdate() {
-    this.renderD3();
+  componentDidUpdate(prevProps, prevState) {
+    if (!this.loaded) {
+      this.loaded = true;
+      this.renderD3();
+    }
   }
 
   render() {
     const self = this;
-    const { hover } = this.state;
+    var hover = this.state && this.state.hover;
+
     return (
       <Wrapper className="relative-gap-chart" hover={hover}>
         {hover &&
@@ -101,6 +103,31 @@ class Chart extends React.Component {
     return result;
   }
 
+  updateD3() {
+    const { fisheye } = this.chartProperties;
+
+    // reattach to faux dom
+    var faux = this.props.connectFauxDOM("div", "chart");
+    var svgDoc = d3.select(faux).select("svg");
+    var circles = svgDoc.select("g").selectAll("circle");
+
+    // update all circles to new positions
+    circles
+      .each(function(d) {
+        d.fisheye = fisheye(d);
+      })
+      .attr("cx", function(d) {
+        return d.fisheye.x;
+      })
+      .attr("cy", function(d) {
+        return d.fisheye.y;
+      })
+      .transition()
+      .duration(500);
+
+    this.props.animateFauxDOM(100);
+  }
+
   renderD3() {
     var self = this;
     var { data, domain } = this.props;
@@ -111,16 +138,29 @@ class Chart extends React.Component {
       width,
       height,
       xBuffer,
-      circleRadius
+      circleRadius,
+      fisheye
     } = self.chartProperties;
 
     this.height = height;
 
+    // faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
 
-    // apply margins
+    // create svg
     var svg = d3
       .select(faux)
+      .on("mousemove", function(param1, param2, param3) {
+        var element = param3[0].component.childNodes[0];
+        var position = d3.mouse(element);
+
+        position[0] -= margin.left + xBuffer;
+        position[1] = height - position[1] + margin.bottom - 5;
+
+        fisheye.focus(position);
+
+        self.updateD3();
+      })
       .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
@@ -141,16 +181,18 @@ class Chart extends React.Component {
     };
     this.scales = scales;
 
-    // sort data
-    data.series.sort(function(a, b) {
-      return d3.ascending(a.relativeGap, b.relativeGap);
+    // define d.x and d.y
+    data.series.map(function(d, i) {
+      d.x = scales.x(i);
+      d.y = scales.y(Math.abs(d.relativeGap));
+      return d;
     });
 
     // append data and svg elements
     var binding = svg.selectAll("g").data(data.series);
     var enterG = binding.enter().append("g");
 
-    // woman points
+    // circles
     enterG
       .append("circle")
       .attr("class", (d, i) => `data bar--x-${i}`)
@@ -159,17 +201,17 @@ class Chart extends React.Component {
           ? self.props.theme.menColor
           : self.props.theme.womenColor;
       })
-      .attr("cx", function(d, i) {
-        return scales.x(i);
+      .attr("cx", function(d) {
+        return d.x;
       })
       .attr("cy", function(d) {
-        return scales.y(Math.abs(d.relativeGap));
+        return d.y;
       })
       .attr("r", function(d) {
-        return 2;
-      })
-      .on("mouseover", self.handleMouseoverEvent);
-    // .on("mouseout", self.handleMouseoutEvent);
+        return circleRadius;
+      });
+    // .on("mouseover", self.handleMouseoverEvent);
+    // .on("mouseout", self.handleMouseoutEv2ent);
 
     enterG
       .append("path")
@@ -191,8 +233,8 @@ class Chart extends React.Component {
           " " +
           scales.y(Math.abs(d.relativeGap))
         );
-      })
-      .on("mouseover", self.handleMouseoverEvent);
+      });
+    // .on("mouseover", self.handleMouseoverEvent);
     // .on("mouseout", self.handleMouseoutEvent);
 
     // add y axis
@@ -240,7 +282,8 @@ class Chart extends React.Component {
 }
 
 Chart.defaultProps = {
-  chart: "loading"
+  chart: "loading",
+  loaded: false
 };
 
 const FauxChart = withFauxDOM(Chart);

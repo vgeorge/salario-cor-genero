@@ -130,8 +130,8 @@ class App extends Component {
                 this.state.data.numberOfProfessions
             )}).
           </p>
+
           <Chart data={this.state.data} onChange={this._changeHover} />
-          <Infobox data={this.state.data} hover={this.state.hover} />
         </Wrapper>
       </ThemedApp>
     );
