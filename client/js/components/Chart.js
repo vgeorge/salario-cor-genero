@@ -10,19 +10,14 @@ const Wrapper = styled.div`
   display: inline-block;
 
   .data {
-    opacity: ${({ hover }) => (hover && hover.d ? 0.25 : 1)};
+    pointer-events: none;
   }
 
-  ${({ hover }) =>
-    hover &&
-    hover.i >= 0 &&
-    `.bar--x-${hover.i} {
-    opacity: 1;
-    -webkit-transition: opacity .2s ease-in;
-  }`}
+  .tick {
+    pointer-events: none;
+  }
 
   .tooltip {
-
     visibility: ${({ hover }) => (hover ? "visible" : "hidden")};
     -webkit-transition: top .2s ease-out, left .2s ease-out;
   }
@@ -103,9 +98,18 @@ class Chart extends React.Component {
   }
 
   positionLine(line) {
-    const { xScale, yScale } = this;
+    const { xScale, yScale, selected } = this;
 
     line
+      .style("stroke-width", function(d, i) {
+        if (selected == null) return 2;
+        else if (selected == i) return 5;
+        else return 1;
+      })
+      .style("opacity", function(d, i) {
+        if (selected == null || selected == i) return 1;
+        else return 0.5;
+      })
       .attr("x1", function(d, i) {
         return xScale(i);
       })
@@ -116,7 +120,7 @@ class Chart extends React.Component {
         return xScale(i);
       })
       .attr("y2", function(d, i) {
-        return yScale(Math.abs(d.relativeGap));
+        return yScale(Math.abs(d.relativeGap * (selected == i ? 1.5 : 1)));
       });
   }
 
@@ -175,7 +179,6 @@ class Chart extends React.Component {
       .enter()
       .append("line")
       .attr("class", (d, i) => `data bar--x-${i}`)
-      .style("stroke-width", barStroke)
       .style("stroke", function(d) {
         return d.relativeGap > 0
           ? self.props.theme.menColor
@@ -232,12 +235,24 @@ class Chart extends React.Component {
 
     svg.on("mouseout", function() {
       self.xScale = self.xLinerScale;
+      self.selected = null;
       self.updatePositions();
     });
 
     svg.on("mousemove", function(param1, param2, param3, param4) {
       var mouse = d3.mouse(this.component.childNodes[0]);
+      var { numberOfProfessions } = data;
       self.xScale = self.xFisheyeScale.distortion(10).focus(mouse[0]);
+
+      var position = Math.round(self.xLinerScale.invert(mouse[0]));
+
+      if (position < 0) {
+        self.selected = 0;
+      } else if (position > numberOfProfessions - 1) {
+        self.selected = numberOfProfessions - 1;
+      } else self.selected = position;
+
+
       self.updatePositions();
     });
   }
