@@ -12,6 +12,10 @@ import Chart from "./components/Chart";
 import Infobox from "./components/Infobox";
 
 const Wrapper = styled.div`
+  border: 1px solid black;
+  margin: 20px;
+  padding: 10px 30px;
+  height: 650px;
 `;
 
 class App extends Component {

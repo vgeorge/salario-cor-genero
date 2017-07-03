@@ -4,7 +4,6 @@ import { transparentize } from "polished";
 import * as d3 from "d3";
 import d3Fisheye from "../helpers/d3-fisheye.js";
 import { withFauxDOM } from "react-faux-dom";
-import Tooltip from "./Tooltip.js";
 
 const Wrapper = styled.div`
   position: relative;
@@ -34,18 +33,17 @@ class Chart extends React.Component {
     super(props);
 
     const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    this.chartProperties = {
+    this.chartDimensions = {
       margin: margin,
-      width: window.innerWidth - margin.left - margin.right,
+      width: window.innerWidth - margin.left - margin.right - 100,
       height: 500 - margin.top - margin.bottom,
-      xBuffer: 50,
-      circleRadius: 2,
-      fisheye: d3Fisheye.circular().radius(50).distortion(2)
+      xBuffer: 50
     };
 
     // Bindings
     this.renderD3 = this.renderD3.bind(this);
-    this.updateD3 = this.updateD3.bind(this);
+    this.updatePositions = this.updatePositions.bind(this);
+    this.positionLine = this.positionLine.bind(this);
     this.handleMouseoverEvent = this.handleMouseoverEvent.bind(this);
     this.handleMouseoutEvent = this.handleMouseoutEvent.bind(this);
   }
@@ -93,8 +91,8 @@ class Chart extends React.Component {
   computeTooltipProps(hover) {
     var result = {
       style: {
-        top: this.scales.y(Math.abs(hover.d.relativeGap)) - 100,
-        left: this.scales.x(hover.i) + (hover.d.relativeGap > 0 ? -180 : +60)
+        top: this.yScale(Math.abs(hover.d.relativeGap)) - 100,
+        left: this.xScale(hover.i) + (hover.d.relativeGap > 0 ? -180 : +60)
       },
       d: hover.d,
       i: hover.i
@@ -103,142 +101,94 @@ class Chart extends React.Component {
     return result;
   }
 
-  updateD3() {
-    const { fisheye } = this.chartProperties;
+  positionLine(line) {
+    const { xScale, yScale } = this;
 
-    // reattach to faux dom
-    var faux = this.props.connectFauxDOM("div", "chart");
-    var svgDoc = d3.select(faux).select("svg");
-    var circles = svgDoc.select("g").selectAll("circle");
-
-    // update all circles to new positions
-    circles
-      .each(function(d) {
-        d.fisheye = fisheye(d);
+    line
+      .attr("x1", function(d, i) {
+        return xScale(i);
       })
-      .attr("cx", function(d) {
-        return d.fisheye.x;
+      .attr("y1", function(d, i) {
+        return yScale(0);
       })
-      .attr("cy", function(d) {
-        return d.fisheye.y;
+      .attr("x2", function(d, i) {
+        return xScale(i);
       })
-      .transition()
-      .duration(500);
-
-    this.props.animateFauxDOM(100);
+      .attr("y2", function(d, i) {
+        return yScale(Math.abs(d.relativeGap));
+      });
   }
 
   renderD3() {
     var self = this;
     var { data, domain } = this.props;
 
-    // Chart rendering parameters
-    const {
-      margin,
-      width,
-      height,
-      xBuffer,
-      circleRadius,
-      fisheye
-    } = self.chartProperties;
+    // Get chart dimensions
+    const { margin, width, height, xBuffer } = self.chartDimensions;
 
-    this.height = height;
-
-    // faux dom
+    // Connect to faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
 
-    // create svg
+    // Create svg and set origin
     var svg = d3
       .select(faux)
-      .on("mousemove", function(param1, param2, param3) {
-        var element = param3[0].component.childNodes[0];
-        var position = d3.mouse(element);
-
-        position[0] -= margin.left + xBuffer;
-        position[1] = height - position[1] + margin.bottom - 5;
-
-        fisheye.focus(position);
-
-        self.updateD3();
-      })
       .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // return empty node if data is not defined yet
+    // Add a background rect for mousemove.
+    svg
+      .append("rect")
+      .attr("class", "background")
+      .attr("fill", "#fff")
+      .attr("width", width)
+      .attr("height", height);
+
+    // Stop composing if data is not avaliable
     if (!data.series) return;
 
-    // Define scales
+    // Create fisheye scale
+    this.xFisheyeScale = d3Fisheye
+      .scale(d3.scale.linear)
+      .domain([0, data.series.length])
+      .range([0, width - xBuffer]);
 
-    const scales = {
-      x: d3
-        .scaleLinear()
-        .range([xBuffer, width - xBuffer])
-        .domain([0, data.series.length]),
-      y: d3.scaleLinear().range([height, 0]).domain([0, data.relativeGapMax])
-    };
-    this.scales = scales;
+    // Create linear scale
+    var xScale = (this.xScale = this.xLinerScale = d3.scale
+      .linear()
+      .domain([0, data.series.length])
+      .range([0, width - xBuffer]));
 
-    // define d.x and d.y
-    data.series.map(function(d, i) {
-      d.x = scales.x(i);
-      d.y = scales.y(Math.abs(d.relativeGap));
-      return d;
-    });
+    var yScale = (this.yScale = d3.scale
+      .linear()
+      .domain([0, data.relativeGapMax])
+      .range([height, 0]));
 
-    // append data and svg elements
-    var binding = svg.selectAll("g").data(data.series);
-    var enterG = binding.enter().append("g");
-
-    // circles
-    enterG
-      .append("circle")
+    var lines = svg
+      .append("g")
+      .attr("class", "lines")
+      .selectAll(".line")
+      .data(data.series)
+      .enter()
+      .append("line")
       .attr("class", (d, i) => `data bar--x-${i}`)
-      .style("fill", function(d) {
-        return d.relativeGap > 0
-          ? self.props.theme.menColor
-          : self.props.theme.womenColor;
-      })
-      .attr("cx", function(d) {
-        return d.x;
-      })
-      .attr("cy", function(d) {
-        return d.y;
-      })
-      .attr("r", function(d) {
-        return circleRadius;
-      });
-    // .on("mouseover", self.handleMouseoverEvent);
-    // .on("mouseout", self.handleMouseoutEv2ent);
-
-    enterG
-      .append("path")
-      .attr("class", (d, i) => `data bar--x-${i}`)
-      .style("stroke-width", 3)
+      .style("stroke-width", 1)
       .style("stroke", function(d) {
         return d.relativeGap > 0
           ? self.props.theme.menColor
           : self.props.theme.womenColor;
       })
-      .attr("d", function(d, i) {
-        return (
-          "M " +
-          scales.x(i) +
-          " " +
-          scales.y(0) +
-          " L " +
-          scales.x(i) +
-          " " +
-          scales.y(Math.abs(d.relativeGap))
-        );
-      });
-    // .on("mouseover", self.handleMouseoverEvent);
-    // .on("mouseout", self.handleMouseoutEvent);
+      .call(self.positionLine);
 
     // add y axis
-    var axis = d3.axisRight(scales.y).ticks(3).tickSize(width);
+    var axis = d3.svg
+      .axis()
+      .orient("right")
+      .scale(yScale)
+      .ticks(3)
+      .tickSize(width);
 
     // formart axis' ticks
     svg.append("g").call(axis).call(function(g) {
@@ -251,7 +201,7 @@ class Chart extends React.Component {
     });
 
     // format axis labels
-    var axisLabel = d3.axisLeft(scales.y).ticks(5, "%");
+    var axisLabel = d3.svg.axis().orient("left").scale(yScale).ticks(5, "%");
 
     svg
       .append("g")
@@ -259,7 +209,7 @@ class Chart extends React.Component {
       .style("fill", self.props.theme.menColor)
       .attr("class", "x label")
       .attr("text-anchor", "end")
-      .attr("x", scales.x(data.series.length - 1))
+      .attr("x", xScale(data.series.length - 1))
       .attr("y", height + margin.right + 5)
       .text("Homens recebem mais →");
 
@@ -269,7 +219,7 @@ class Chart extends React.Component {
       .style("fill", self.props.theme.womenColor)
       .attr("class", "x label")
       .attr("text-anchor", "begin")
-      .attr("x", scales.x(0))
+      .attr("x", xScale(0))
       .attr("y", height + margin.right + 5)
       .text("← Mulheres recebem mais");
 
@@ -278,11 +228,35 @@ class Chart extends React.Component {
       g.selectAll(".tick line").remove();
       g.select(".domain").remove();
     });
+
+    svg.on("mouseout", function() {
+      self.xScale = self.xLinerScale;
+      self.updatePositions();
+    });
+
+    svg.on("mousemove", function(param1, param2, param3, param4) {
+      var mouse = d3.mouse(this.component.childNodes[0]);
+      self.xScale = self.xFisheyeScale.distortion(10).focus(mouse[0]);
+      self.updatePositions();
+    });
+  }
+
+  updatePositions(xScale) {
+    const { fisheye } = this.chartDimensions;
+    var { positionLine, xScale } = this;
+
+    // reattach to faux dom
+    var faux = this.props.connectFauxDOM("div", "chart");
+    var svg = d3.select(faux).select("svg");
+
+    svg.select("g").selectAll("line").call(positionLine);
+
+    this.props.animateFauxDOM(100);
   }
 }
 
 Chart.defaultProps = {
-  chart: "loading",
+  chart: "Carregando...",
   loaded: false
 };
 

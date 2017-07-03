@@ -1,3 +1,5 @@
+import * as d3 from "d3";
+
 const d3Fisheye = {
   scale: function(scaleType) {
     return d3_fisheye_scale(scaleType(), 3, 0);
@@ -13,11 +15,6 @@ const d3Fisheye = {
       var dx = d.x - focus[0],
         dy = d.y - focus[1],
         dd = Math.sqrt(dx * dx + dy * dy);
-
-      // console.log(`focus: ${focus}`);
-      // console.log(`d.x ${d.x} d.y ${d.y} `);
-      // console.log(`dx ${dx} dy ${dy}`);
-      // console.log(`dd ${dd} `);
       if (!dd || dd >= radius)
         return { x: d.x, y: d.y, z: dd >= radius ? 1 : 10 };
       var k = k0 * (1 - Math.exp(-dd * k1)) / dd * 0.75 + 0.25;
@@ -48,14 +45,8 @@ const d3Fisheye = {
     };
 
     fisheye.focus = function(_) {
-      // console.log("_");
-      // console.log(_);
-      // console.log("arguments");
-      // console.log(arguments);
       if (!arguments.length) return focus;
       focus = _;
-      // console.log("focus");
-      // console.log(focus);
       return fisheye;
     };
 
