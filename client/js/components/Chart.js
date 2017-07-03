@@ -33,11 +33,12 @@ class Chart extends React.Component {
     super(props);
 
     const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    this.chartDimensions = {
+    this.chartConfig = {
       margin: margin,
       width: window.innerWidth - margin.left - margin.right - 100,
       height: 500 - margin.top - margin.bottom,
-      xBuffer: 50
+      xBuffer: 20,
+      barStroke: 2
     };
 
     // Bindings
@@ -124,7 +125,7 @@ class Chart extends React.Component {
     var { data, domain } = this.props;
 
     // Get chart dimensions
-    const { margin, width, height, xBuffer } = self.chartDimensions;
+    const { margin, width, height, xBuffer, barStroke } = self.chartConfig;
 
     // Connect to faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
@@ -153,13 +154,13 @@ class Chart extends React.Component {
     this.xFisheyeScale = d3Fisheye
       .scale(d3.scale.linear)
       .domain([0, data.series.length])
-      .range([0, width - xBuffer]);
+      .range([xBuffer, width - xBuffer]);
 
     // Create linear scale
     var xScale = (this.xScale = this.xLinerScale = d3.scale
       .linear()
       .domain([0, data.series.length])
-      .range([0, width - xBuffer]));
+      .range([xBuffer, width - xBuffer]));
 
     var yScale = (this.yScale = d3.scale
       .linear()
@@ -174,7 +175,7 @@ class Chart extends React.Component {
       .enter()
       .append("line")
       .attr("class", (d, i) => `data bar--x-${i}`)
-      .style("stroke-width", 1)
+      .style("stroke-width", barStroke)
       .style("stroke", function(d) {
         return d.relativeGap > 0
           ? self.props.theme.menColor
@@ -242,7 +243,7 @@ class Chart extends React.Component {
   }
 
   updatePositions(xScale) {
-    const { fisheye } = this.chartDimensions;
+    const { fisheye } = this.chartConfig;
     var { positionLine, xScale } = this;
 
     // reattach to faux dom
