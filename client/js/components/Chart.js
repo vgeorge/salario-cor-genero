@@ -249,7 +249,7 @@ class Chart extends React.Component {
     var faux = this.props.connectFauxDOM("div", "chart");
     var svg = d3.select(faux).select("svg");
 
-    svg.select("g").selectAll("line").call(positionLine);
+    svg.select("g").selectAll(".lines line").call(positionLine);
 
     this.props.animateFauxDOM(100);
   }
