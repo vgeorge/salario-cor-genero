@@ -118,14 +118,14 @@ class App extends Component {
         <Wrapper>
           <h1>Diferenças salariais entre homens e mulheres</h1>
           <p>
-            Segundo o IBGE, homens ganham mais em {" "}
-            {this.state.data.professionsWomanEarnLess}{" "}
-            de {this.state.data.numberOfProfessions} profissões pesquisadas ({format(
-              ".0%"
-            )(
+            Segundo pesquisa CAGED{" "}2016, do Ministério do Trabalho e
+            Emprego, homens ganham mais em{" "}
+            {format(".0%")(
               this.state.data.professionsWomanEarnLess /
                 this.state.data.numberOfProfessions
-            )}).
+            )}{" "}
+            {" "}
+            das profissões.
           </p>
           <Chart data={this.state.data} />
         </Wrapper>
