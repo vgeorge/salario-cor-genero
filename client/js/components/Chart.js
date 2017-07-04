@@ -4,6 +4,7 @@ import { transparentize } from "polished";
 import * as d3 from "d3";
 import d3Fisheye from "../helpers/d3-fisheye.js";
 import { withFauxDOM } from "react-faux-dom";
+import SearchBox from "./SearchBox";
 
 const Wrapper = styled.div`
   position: relative;
@@ -36,12 +37,14 @@ class Chart extends React.Component {
       barStroke: 2
     };
 
+    this.state = {};
+
     // Bindings
     this.renderD3 = this.renderD3.bind(this);
     this.updatePositions = this.updatePositions.bind(this);
     this.positionLine = this.positionLine.bind(this);
-    this.handleMouseoverEvent = this.handleMouseoverEvent.bind(this);
-    this.handleMouseoutEvent = this.handleMouseoutEvent.bind(this);
+    this.resetChart = this.resetChart.bind(this);
+    this.onProfessionEnter = this.onProfessionEnter.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -51,35 +54,37 @@ class Chart extends React.Component {
     }
   }
 
+  onProfessionEnter(profession) {
+    if (!profession) {
+      this.setState({
+        selectedProfession: null,
+        frozen: false
+      });
+      this.resetChart();
+    } else {
+      this.setState({
+        selectedProfession: profession.value,
+        frozen: true
+      });
+      this.updatePositions();
+    }
+  }
+
   render() {
     const self = this;
-    var hover = this.state && this.state.hover;
+    const { loaded } = this;
 
     return (
-      <Wrapper className="relative-gap-chart" hover={hover}>
-        {hover &&
-          hover.d &&
-          <Tooltip key="2" {...this.computeTooltipProps(hover)} />}
+      <Wrapper className="relative-gap-chart">
+        {loaded &&
+          <SearchBox
+            data={this.props.data}
+            selectedProfession={this.state.selectedProfession}
+            onProfessionEnter={this.onProfessionEnter}
+          />}
         {this.props.chart}
       </Wrapper>
     );
-  }
-
-  // MOUSE EVENTS
-
-  setHover(d, i) {
-    const hover = { d, i };
-    this.setState({ hover });
-    this.props.onChange(hover);
-  }
-
-  handleMouseoverEvent(d, i) {
-    clearTimeout(this.unsetHoverTimeout);
-    this.setHover(d, i);
-  }
-
-  handleMouseoutEvent(d) {
-    this.unsetHoverTimeout = setTimeout(() => this.setHover(null), 200);
   }
 
   // TOOLTIP
@@ -98,16 +103,17 @@ class Chart extends React.Component {
   }
 
   positionLine(line) {
-    const { xScale, yScale, selected } = this;
+    const { xScale, yScale } = this;
+    const { selectedProfession } = this.state;
 
     line
       .style("stroke-width", function(d, i) {
-        if (selected == null) return 2;
-        else if (selected == i) return 5;
+        if (selectedProfession == null) return 2;
+        else if (selectedProfession == i) return 5;
         else return 1;
       })
       .style("opacity", function(d, i) {
-        if (selected == null || selected == i) return 1;
+        if (selectedProfession == null || selectedProfession == i) return 1;
         else return 0.5;
       })
       .attr("x1", function(d, i) {
@@ -120,7 +126,9 @@ class Chart extends React.Component {
         return xScale(i);
       })
       .attr("y2", function(d, i) {
-        return yScale(Math.abs(d.relativeGap * (selected == i ? 1.5 : 1)));
+        return yScale(
+          Math.abs(d.relativeGap * (selectedProfession == i ? 1.5 : 1))
+        );
       });
   }
 
@@ -234,12 +242,16 @@ class Chart extends React.Component {
     });
 
     svg.on("mouseout", function() {
-      self.xScale = self.xLinerScale;
-      self.selected = null;
-      self.updatePositions();
+      if (self.state.frozen) return;
+      self.resetChart();
+    });
+
+    svg.on("click", function() {
+      self.setState({ frozen: true });
     });
 
     svg.on("mousemove", function(param1, param2, param3, param4) {
+      if (self.state.frozen) return;
       var mouse = d3.mouse(this.component.childNodes[0]);
       var { numberOfProfessions } = data;
       self.xScale = self.xFisheyeScale.distortion(10).focus(mouse[0]);
@@ -247,25 +259,50 @@ class Chart extends React.Component {
       var position = Math.round(self.xLinerScale.invert(mouse[0]));
 
       if (position < 0) {
-        self.selected = 0;
+        position = 0;
       } else if (position > numberOfProfessions - 1) {
-        self.selected = numberOfProfessions - 1;
-      } else self.selected = position;
+        position = numberOfProfessions - 1;
+      }
 
+      self.setState({ selectedProfession: position });
 
       self.updatePositions();
     });
   }
 
-  updatePositions(xScale) {
-    const { fisheye } = this.chartConfig;
+  updatePositions() {
     var { positionLine, xScale } = this;
 
-    // reattach to faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
     var svg = d3.select(faux).select("svg");
 
     svg.select("g").selectAll(".lines line").call(positionLine);
+
+    this.props.animateFauxDOM(100);
+  }
+
+  resetChart() {
+    var faux = this.props.connectFauxDOM("div", "chart");
+    var svg = d3.select(faux).select("svg");
+    const { yScale, xLinerScale } = this;
+
+    svg
+      .select("g")
+      .selectAll(".lines line")
+      .style("stroke-width", 2)
+      .style("opacity", 1)
+      .attr("x1", function(d, i) {
+        return xLinerScale(i);
+      })
+      .attr("y1", function(d, i) {
+        return yScale(0);
+      })
+      .attr("x2", function(d, i) {
+        return xLinerScale(i);
+      })
+      .attr("y2", function(d, i) {
+        return yScale(Math.abs(d.relativeGap));
+      });
 
     this.props.animateFauxDOM(100);
   }

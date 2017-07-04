@@ -22,9 +22,6 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    // bind methods
-    this._changeHover = this._changeHover.bind(this);
-
     this.state = {
       data: {
         numberOfProfessions: 0,
@@ -115,10 +112,6 @@ class App extends Component {
     });
   }
 
-  _changeHover(hover) {
-    this.setState({ hover });
-  }
-
   render() {
     return (
       <ThemedApp theme={theme}>
@@ -134,8 +127,7 @@ class App extends Component {
                 this.state.data.numberOfProfessions
             )}).
           </p>
-
-          <Chart data={this.state.data} onChange={this._changeHover} />
+          <Chart data={this.state.data} />
         </Wrapper>
       </ThemedApp>
     );
