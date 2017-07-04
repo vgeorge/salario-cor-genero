@@ -4,6 +4,7 @@ import { transparentize } from "polished";
 import * as d3 from "d3";
 import d3Fisheye from "../helpers/d3-fisheye.js";
 import { withFauxDOM } from "react-faux-dom";
+import Infobox from "./Infobox";
 import SearchBox from "./SearchBox";
 
 const Wrapper = styled.div`
@@ -76,6 +77,12 @@ class Chart extends React.Component {
 
     return (
       <Wrapper className="relative-gap-chart">
+        {loaded &&
+          this.state.selectedProfession >= 0 &&
+          <Infobox
+            data={this.props.data}
+            selectedProfession={this.state.selectedProfession}
+          />}
         {loaded &&
           <SearchBox
             data={this.props.data}
@@ -176,7 +183,7 @@ class Chart extends React.Component {
 
     var yScale = (this.yScale = d3.scale
       .linear()
-      .domain([0, data.relativeGapMax])
+      .domain([0, data.relativeGapMax + 0.1])
       .range([height, 0]));
 
     var lines = svg
