@@ -254,7 +254,14 @@ class Chart extends React.Component {
     });
 
     svg.on("click", function() {
-      self.setState({ frozen: true });
+      var frozen = true;
+      if (self.state && self.state.frozen) {
+        frozen = false;
+      }
+
+      self.setState({
+        frozen: frozen
+      });
     });
 
     svg.on("mousemove", function(param1, param2, param3, param4) {
