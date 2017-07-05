@@ -1,18 +1,23 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
 import styled from "styled-components";
-import * as d3 from "d3";
+import format from "../helpers/format";
 
 const MaleIcon = require("react-icons/lib/fa/male");
 const FemaleIcon = require("react-icons/lib/fa/female");
 
 const Wrapper = styled.div`
   position: absolute;
-  left: 200px;
-  top: 150px;
-  border: 1px solid black;
+  left: 110px;
+  top: 80px;
+  border: 1px solid #ccc;
   padding: 10px;
   background: white;
+  height: 170px;
+  width: 150px;
+  h3, p {
+    text-align: center;
+  }
 `;
 
 class Infobox extends Component {
@@ -25,19 +30,24 @@ class Infobox extends Component {
 
     const profession = data.series[selectedProfession];
 
+    const genderWithBetterSalary = profession.relativeGap > 0
+      ? "Homens"
+      : "Mulheres";
+
     return (
       <Wrapper>
-        <h1>
+        <h3>
           Salário Médio
-        </h1>
+        </h3>
         <p>
-          <MaleIcon /> R${profession.menSalary}
+          <MaleIcon /> {format.currency(profession.menSalary)}
         </p>
         <p>
-          <FemaleIcon /> R${profession.womenSalary}
+          <FemaleIcon /> {format.currency(profession.womenSalary)}
         </p>
         <p>
-          Diferença: {d3.format(".1%")(profession.relativeGap)}
+          {genderWithBetterSalary} recebem{" "}
+          {format.percent(Math.abs(profession.relativeGap))} mais
         </p>
       </Wrapper>
     );

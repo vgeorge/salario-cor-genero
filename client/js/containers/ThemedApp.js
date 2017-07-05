@@ -14,7 +14,7 @@ injectGlobal`
 const Root = styled.div`
   color: ${({ theme }) => theme.color};
   font-family: Merriweather sans, sans-serif;
-  padding: 8px;
+  padding: 10px;
 `;
 
 const ThemedApp = ({ theme, children }) =>

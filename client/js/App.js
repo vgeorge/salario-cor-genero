@@ -1,21 +1,19 @@
 import "babel-polyfill";
+import _ from "lodash";
 import React, { Component } from "react";
 import { render } from "react-dom";
 import { csv, format, ascending, max } from "d3";
 
 import styled from "styled-components";
-import { Flex, Box } from "grid-styled";
 import theme from "./constants/theme";
 import ThemedApp from "./containers/ThemedApp";
 
 import Chart from "./components/Chart";
-import Infobox from "./components/Infobox";
 
 const Wrapper = styled.div`
   border: 1px solid black;
   margin: 20px;
   padding: 10px 30px;
-  height: 650px;
 `;
 
 class App extends Component {
@@ -26,7 +24,9 @@ class App extends Component {
       data: {
         numberOfProfessions: 0,
         professionsWomanEarnLess: 0
-      }
+      },
+      height: window.innerHeight,
+      width: window.innerWidth - 80
     };
 
     // load data
@@ -56,7 +56,9 @@ class App extends Component {
           // Calculate absolute and relative gap
           d.absoluteGap = d.menSalary - d.womenSalary;
           d.relativeGap = d.absoluteGap / Math.min(d.menSalary, d.womenSalary);
-
+          return d;
+        })
+        .map(function(d) {
           if (d.absoluteGap > 0) data.professionsWomanEarnLess++;
 
           // Make racial ranking, if data is available
