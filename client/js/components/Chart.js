@@ -34,7 +34,7 @@ class Chart extends React.Component {
     const margin = { top: 20, right: 20, bottom: 30, left: 50 };
     this.chartConfig = {
       margin: margin,
-      height: 500 - margin.top - margin.bottom,
+      height: window.innerHeight - 350,
       xBuffer: 20,
       barStroke: 2
     };
