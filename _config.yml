@@ -1,8 +1,8 @@
 # Site settings
-title: Salário, Cor e Gênero no Brasil
+title: Salário e Gênero no Brasil
 email:
 description: >
-  Visualização da diferença salarial entre gênero e cor no Brasil
+  Visualização da diferença salarial entre gênero no Brasil
 baseurl: ""
 url: "https://vgeorge.github.io"
 
