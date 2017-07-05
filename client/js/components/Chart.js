@@ -1,9 +1,11 @@
 import React from "react";
+import Dimensions from "react-dimensions";
 import styled, { withTheme } from "styled-components";
 import { transparentize } from "polished";
 import * as d3 from "d3";
 import d3Fisheye from "../helpers/d3-fisheye.js";
 import { withFauxDOM } from "react-faux-dom";
+import WindowResizeListener from "../helpers/WindowResizeListener";
 import Infobox from "./Infobox";
 import SearchBox from "./SearchBox";
 
@@ -32,7 +34,6 @@ class Chart extends React.Component {
     const margin = { top: 20, right: 20, bottom: 30, left: 50 };
     this.chartConfig = {
       margin: margin,
-      width: window.innerWidth - margin.left - margin.right - 100,
       height: 500 - margin.top - margin.bottom,
       xBuffer: 20,
       barStroke: 2
@@ -46,6 +47,7 @@ class Chart extends React.Component {
     this.positionLine = this.positionLine.bind(this);
     this.resetChart = this.resetChart.bind(this);
     this.onProfessionEnter = this.onProfessionEnter.bind(this);
+    this._changeWindowDimensions = this._changeWindowDimensions.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -71,12 +73,37 @@ class Chart extends React.Component {
     }
   }
 
+  _changeWindowDimensions(windowSize) {
+    const { margin, xBuffer } = this.chartConfig;
+    const { containerWidth } = this.props;
+    const width = this.props.containerWidth - margin.left - margin.right;
+
+    // update scales
+    this.xLinerScale.range([xBuffer, width - xBuffer]);
+    this.xFisheyeScale.range([xBuffer, width - xBuffer]);
+
+    // get faux dom
+    var faux = this.props.connectFauxDOM("div", "chart");
+    var svg = d3.select(faux).select("svg");
+
+    // update elements width
+    svg.attr("width", containerWidth);
+    svg.select("rect").attr("width", containerWidth);
+
+    svg.select(".label.men").attr("x", width - xBuffer);
+
+    //
+    this.updatePositions();
+  }
+
   render() {
     const self = this;
     const { loaded } = this;
 
     return (
       <Wrapper className="relative-gap-chart">
+        {loaded &&
+          <WindowResizeListener onResize={this._changeWindowDimensions} />}
         {loaded &&
           this.state.selectedProfession >= 0 &&
           <Infobox
@@ -90,23 +117,9 @@ class Chart extends React.Component {
             onProfessionEnter={this.onProfessionEnter}
           />}
         {this.props.chart}
+
       </Wrapper>
     );
-  }
-
-  // TOOLTIP
-
-  computeTooltipProps(hover) {
-    var result = {
-      style: {
-        top: this.yScale(Math.abs(hover.d.relativeGap)) - 100,
-        left: this.xScale(hover.i) + (hover.d.relativeGap > 0 ? -180 : +60)
-      },
-      d: hover.d,
-      i: hover.i
-    };
-
-    return result;
   }
 
   positionLine(line) {
@@ -141,10 +154,12 @@ class Chart extends React.Component {
 
   renderD3() {
     var self = this;
-    var { data, domain } = this.props;
+    var { data, domain, containerWidth } = this.props;
 
     // Get chart dimensions
-    const { margin, width, height, xBuffer, barStroke } = self.chartConfig;
+    const { margin, height, xBuffer, barStroke } = self.chartConfig;
+
+    const width = containerWidth - margin.left - margin.right;
 
     // Connect to faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
@@ -153,7 +168,7 @@ class Chart extends React.Component {
     var svg = d3
       .select(faux)
       .append("svg")
-      .attr("width", width + margin.left + margin.right)
+      .attr("width", containerWidth)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -226,7 +241,7 @@ class Chart extends React.Component {
       .append("g")
       .append("text")
       .style("fill", self.props.theme.menColor)
-      .attr("class", "x label")
+      .attr("class", "x label men")
       .attr("text-anchor", "end")
       .attr("x", xScale(data.series.length - 1))
       .attr("y", height + margin.right + 5)
@@ -236,7 +251,7 @@ class Chart extends React.Component {
       .append("g")
       .append("text")
       .style("fill", self.props.theme.womenColor)
-      .attr("class", "x label")
+      .attr("class", "x label women")
       .attr("text-anchor", "begin")
       .attr("x", xScale(0))
       .attr("y", height + margin.right + 5)
@@ -329,4 +344,4 @@ Chart.defaultProps = {
 
 const FauxChart = withFauxDOM(Chart);
 
-export default withTheme(FauxChart);
+export default Dimensions()(withTheme(FauxChart));

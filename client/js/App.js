@@ -24,9 +24,7 @@ class App extends Component {
       data: {
         numberOfProfessions: 0,
         professionsWomanEarnLess: 0
-      },
-      height: window.innerHeight,
-      width: window.innerWidth - 80
+      }
     };
 
     // load data
