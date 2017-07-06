@@ -1,24 +1,35 @@
 import "babel-polyfill";
-import _ from "lodash";
+import { debounce } from "lodash";
 import React, { Component } from "react";
 import { render } from "react-dom";
 import { csv, format, ascending, max } from "d3";
-
-import styled from "styled-components";
-import theme from "./constants/theme";
-import ThemedApp from "./containers/ThemedApp";
+import styled, { injectGlobal } from "styled-components";
+import config from "./config";
 
 import Chart from "./components/Chart";
 
+/* eslint-disable no-unused-expressions */
+injectGlobal`
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+`;
+
 const Wrapper = styled.div`
+  font-family: Merriweather sans, sans-serif;
   border: 1px solid black;
-  margin: 20px;
-  padding: 10px 30px;
+  margin: ${props => props.margin}px;
+  padding: ${props => props.padding.top}px ${props => props.padding.left}px;
+  height: ${props =>
+    props.windowHeight - props.margin * 2 - props.padding.top * 2}px;
 `;
 
 class App extends Component {
   constructor(props) {
     super(props);
+
+    this._onResize = this._onResize.bind(this);
 
     this.state = {
       data: {
@@ -112,24 +123,41 @@ class App extends Component {
     });
   }
 
+  _onResize() {
+    var windowHeight =
+      window.innerHeight ||
+      document.documentElement.clientHeight ||
+      document.body.clientHeight;
+    this.setState({ windowHeight });
+  }
+
+  componentDidMount() {
+    this._debouncedResize = debounce(this._onResize, config.debounceTime);
+    window.addEventListener("resize", this._debouncedResize, false);
+  }
+
   render() {
+    var { data, windowHeight } = this.state;
+    const { margin, padding } = config.outerBox;
+
     return (
-      <ThemedApp theme={theme}>
-        <Wrapper>
-          <h1>Diferenças salariais entre homens e mulheres</h1>
-          <p>
-            Segundo pesquisa CAGED{" "}2016, do Ministério do Trabalho e
-            Emprego, homens ganham mais em{" "}
-            {format(".0%")(
-              this.state.data.professionsWomanEarnLess /
-                this.state.data.numberOfProfessions
-            )}{" "}
-            {" "}
-            das profissões.
-          </p>
-          <Chart data={this.state.data} />
-        </Wrapper>
-      </ThemedApp>
+      <Wrapper
+        windowHeight={windowHeight || window.innerHeight}
+        margin={margin}
+        padding={padding}
+      >
+        <h1>Diferenças salariais entre homens e mulheres</h1>
+        <p>
+          Segundo pesquisa CAGED{" "}2016, do Ministério do Trabalho e
+          Emprego, homens ganham mais em{" "}
+          {format(".0%")(
+            data.professionsWomanEarnLess / data.numberOfProfessions
+          )}{" "}
+          {" "}
+          das profissões.
+        </p>
+        <Chart data={data} />
+      </Wrapper>
     );
   }
 }

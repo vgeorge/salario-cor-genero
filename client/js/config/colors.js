@@ -13,8 +13,8 @@ const colors = {
 
 const theme = {
   background: colors.swisscoffee,
-  menColor: colors.slategray,
-  womenColor: colors.turkishrose,
+  men: colors.slategray,
+  women: colors.turkishrose,
   infobox: {
     background: colors.swisscoffee,
     title: colors.hippieblue

@@ -1,13 +1,19 @@
 import React from "react";
 import Dimensions from "react-dimensions";
-import styled, { withTheme } from "styled-components";
-import { transparentize } from "polished";
+import styled from "styled-components";
+
+/* D3.js */
 import * as d3 from "d3";
 import d3Fisheye from "../helpers/d3-fisheye.js";
-import { withFauxDOM } from "react-faux-dom";
-import WindowResizeListener from "../helpers/WindowResizeListener";
+
+/* Components */
 import Infobox from "./Infobox";
 import SearchBox from "./SearchBox";
+import { withFauxDOM } from "react-faux-dom";
+import WindowResizeListener from "../helpers/WindowResizeListener";
+
+/* Chart config */
+import colors from "../config/colors.js";
 
 const Wrapper = styled.div`
   position: relative;
@@ -210,9 +216,7 @@ class Chart extends React.Component {
       .append("line")
       .attr("class", (d, i) => `data bar--x-${i}`)
       .style("stroke", function(d) {
-        return d.relativeGap > 0
-          ? self.props.theme.menColor
-          : self.props.theme.womenColor;
+        return d.relativeGap > 0 ? colors.men : colors.women;
       })
       .call(self.positionLine);
 
@@ -240,7 +244,7 @@ class Chart extends React.Component {
     svg
       .append("g")
       .append("text")
-      .style("fill", self.props.theme.menColor)
+      .style("fill", colors.men)
       .attr("class", "x label men")
       .attr("text-anchor", "end")
       .attr("x", xScale(data.series.length - 1))
@@ -250,7 +254,7 @@ class Chart extends React.Component {
     svg
       .append("g")
       .append("text")
-      .style("fill", self.props.theme.womenColor)
+      .style("fill", colors.women)
       .attr("class", "x label women")
       .attr("text-anchor", "begin")
       .attr("x", xScale(0))
@@ -344,4 +348,4 @@ Chart.defaultProps = {
 
 const FauxChart = withFauxDOM(Chart);
 
-export default Dimensions()(withTheme(FauxChart));
+export default Dimensions()(FauxChart);
