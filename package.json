@@ -1,10 +1,10 @@
 {
-  "name": "salario-cor-genero",
+  "name": "salario-e-genero",
   "version": "0.0.0",
   "description": "Visualization of pay gap by gender and race in Brazil.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vgeorge/salario-cor-genero.git"
+    "url": "git+https://github.com/vgeorge/salario-e-genero.git"
   },
   "keywords": [
     "pay gap",
@@ -15,7 +15,7 @@
   ],
   "author": "Vitor George",
   "license": "MIT",
-  "homepage": "https://vgeorge.github.com/salario-cor-genero",
+  "homepage": "https://vgeorge.github.com/salario-e-genero",
   "devDependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^6.4.1",

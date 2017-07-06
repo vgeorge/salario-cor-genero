@@ -1,4 +1,4 @@
-> [Visualization of pay gap between gender and race in Brazil, according to IBGE data.](https://vgeorge.github.io/salario-cor-genero)
+> [Visualization of pay gap between gender in Brazil.](https://vgeorge.github.io/salario-e-genero)
 
 # References
 
@@ -23,8 +23,8 @@ React and Jekyll:
 
 # Run it locally
 
-This visualization is built with D3, React, Jekyll and Webpack. To run it locally, clone this repository and run `webpack -w` and `jekyll s -w`.
+This visualization is built with D3, React, Jekyll and Webpack. To run it locally, clone this repository and run `webpack -w` and `jekyll s -w` in different terminal windows.
 
 # License
 
-MIT
+[MIT](LICENSE)
