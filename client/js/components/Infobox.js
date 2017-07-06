@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
 import styled from "styled-components";
-import format from "../helpers/format";
+import format from "../helpers/br-format";
 
 const MaleIcon = require("react-icons/lib/fa/male");
 const FemaleIcon = require("react-icons/lib/fa/female");
