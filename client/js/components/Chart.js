@@ -1,5 +1,4 @@
 import React from "react";
-import Dimensions from "react-dimensions";
 import styled from "styled-components";
 
 /* D3.js */
@@ -8,12 +7,10 @@ import d3Fisheye from "../helpers/d3-fisheye.js";
 
 /* Components */
 import Infobox from "./Infobox";
-import SearchBox from "./SearchBox";
 import { withFauxDOM } from "react-faux-dom";
-import WindowResizeListener from "../helpers/WindowResizeListener";
 
 /* Chart config */
-import colors from "../config/colors.js";
+import config from "../config";
 
 const Wrapper = styled.div`
   position: relative;
@@ -26,24 +23,11 @@ const Wrapper = styled.div`
   .tick {
     pointer-events: none;
   }
-
-  .tooltip {
-    visibility: ${({ hover }) => (hover ? "visible" : "hidden")};
-    -webkit-transition: top .2s ease-out, left .2s ease-out;
-  }
 `;
 
 class Chart extends React.Component {
   constructor(props) {
     super(props);
-
-    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    this.chartConfig = {
-      margin: margin,
-      height: window.innerHeight - 350,
-      xBuffer: 20,
-      barStroke: 2
-    };
 
     this.state = {};
 
@@ -52,76 +36,76 @@ class Chart extends React.Component {
     this.updatePositions = this.updatePositions.bind(this);
     this.positionLine = this.positionLine.bind(this);
     this.resetChart = this.resetChart.bind(this);
-    this.onProfessionEnter = this.onProfessionEnter.bind(this);
-    this._changeWindowDimensions = this._changeWindowDimensions.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!this.loaded) {
-      this.loaded = true;
-      this.renderD3();
-    }
+  componentDidMount() {
+    this.renderD3();
   }
 
-  onProfessionEnter(profession) {
-    if (!profession) {
-      this.setState({
-        selectedProfession: null,
-        frozen: false
+  componentDidUpdate(prevProps) {
+    if (this.props.dimensions !== prevProps.dimensions) {
+      const {
+        containerWidth,
+        containerHeight,
+        headHeight
+      } = this.props.dimensions;
+
+      const { margin, xBuffer } = config.chart;
+
+      // const { xLinearScale, xFisheyeScale, yScale } = this;
+
+      const width = containerWidth - margin.left - margin.right;
+      const height = containerHeight - headHeight;
+      const chartHeight = height - margin.top - margin.bottom;
+
+      var faux = this.props.connectFauxDOM("div", "chart");
+      var svg = d3.select(faux).select("svg");
+
+      svg.attr("height", height);
+      svg.attr("width", width);
+
+      this.xLinearScale.range([xBuffer, width - xBuffer]);
+      this.xFisheyeScale.range([xBuffer, width - xBuffer]);
+
+      this.yScale.range([chartHeight, 0]);
+
+      this.axis.tickSize(width);
+
+      svg.select(".y.axis").call(this.axis).call(function(g) {
+        g.selectAll("text").remove();
+        g.select(".domain").remove();
+        g
+          .selectAll(".tick line")
+          .attr("stroke", "#ccc")
+          .attr("stroke-dasharray", "2,2");
       });
-      this.resetChart();
-    } else {
-      this.setState({
-        selectedProfession: profession.value,
-        frozen: true
+
+      svg.select(".y.axis-label").call(this.axisLabel).call(function(g) {
+        g.selectAll(".tick line").remove();
+        g.select(".domain").remove();
       });
-      this.updatePositions();
+
+      svg.select("g").selectAll(".lines line").call(this.positionLine);
+      svg
+        .select(".label.men")
+        .attr("x", this.xLinearScale(this.props.data.series.length - 1))
+        .attr("y", chartHeight + margin.right + 5);
+      svg
+        .select(".label.women")
+        .attr("x", this.xLinearScale(0))
+        .attr("y", chartHeight + margin.right + 5);
+
+      this.props.animateFauxDOM(800);
     }
-  }
-
-  _changeWindowDimensions(windowSize) {
-    const { margin, xBuffer } = this.chartConfig;
-    const { containerWidth } = this.props;
-    const width = this.props.containerWidth - margin.left - margin.right;
-
-    // update scales
-    this.xLinerScale.range([xBuffer, width - xBuffer]);
-    this.xFisheyeScale.range([xBuffer, width - xBuffer]);
-
-    // get faux dom
-    var faux = this.props.connectFauxDOM("div", "chart");
-    var svg = d3.select(faux).select("svg");
-
-    // update elements width
-    svg.attr("width", containerWidth);
-    svg.select("rect").attr("width", containerWidth);
-
-    svg.select(".label.men").attr("x", width - xBuffer);
-
-    //
-    this.updatePositions();
   }
 
   render() {
-    const self = this;
-    const { loaded } = this;
+    var { data, selectedProfession } = this.props;
 
     return (
       <Wrapper className="relative-gap-chart">
-        {loaded &&
-          <WindowResizeListener onResize={this._changeWindowDimensions} />}
-        {loaded &&
-          this.state.selectedProfession >= 0 &&
-          <Infobox
-            data={this.props.data}
-            selectedProfession={this.state.selectedProfession}
-          />}
-        {loaded &&
-          <SearchBox
-            data={this.props.data}
-            selectedProfession={this.state.selectedProfession}
-            onProfessionEnter={this.onProfessionEnter}
-          />}
+        {selectedProfession >= 0 &&
+          <Infobox data={data} selectedProfession={selectedProfession} />}
         {this.props.chart}
 
       </Wrapper>
@@ -160,12 +144,22 @@ class Chart extends React.Component {
 
   renderD3() {
     var self = this;
-    var { data, domain, containerWidth } = this.props;
 
-    // Get chart dimensions
-    const { margin, height, xBuffer, barStroke } = self.chartConfig;
+    const { colors } = config;
+    const { margin, xBuffer } = config.chart;
+    const { data } = this.props;
+    const {
+      containerWidth,
+      containerHeight,
+      svgWidth,
+      headHeight
+    } = this.props.dimensions;
 
     const width = containerWidth - margin.left - margin.right;
+    const svgHeight = containerHeight - headHeight;
+    const chartHeight = svgHeight - margin.top - margin.bottom;
+
+    console.log("render height", chartHeight);
 
     // Connect to faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
@@ -174,21 +168,18 @@ class Chart extends React.Component {
     var svg = d3
       .select(faux)
       .append("svg")
-      .attr("width", containerWidth)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("width", svgWidth)
+      .attr("height", svgHeight)
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Add a background rect for mousemove.
-    svg
-      .append("rect")
-      .attr("class", "background")
-      .attr("fill", "#fff")
-      .attr("width", width)
-      .attr("height", height);
-
-    // Stop composing if data is not avaliable
-    if (!data.series) return;
+    // svg
+    //   .append("rect")
+    //   .attr("class", "background")
+    //   .attr("fill", "#fff")
+    //   .attr("width", svgWidth)
+    //   .attr("height", chartHeight);
 
     // Create fisheye scale
     this.xFisheyeScale = d3Fisheye
@@ -197,7 +188,7 @@ class Chart extends React.Component {
       .range([xBuffer, width - xBuffer]);
 
     // Create linear scale
-    var xScale = (this.xScale = this.xLinerScale = d3.scale
+    var xScale = (this.xScale = this.xLinearScale = d3.scale
       .linear()
       .domain([0, data.series.length])
       .range([xBuffer, width - xBuffer]));
@@ -205,7 +196,62 @@ class Chart extends React.Component {
     var yScale = (this.yScale = d3.scale
       .linear()
       .domain([0, data.relativeGapMax + 0.1])
-      .range([height, 0]));
+      .range([chartHeight, 0]));
+
+    // add y axis
+    var axis = d3.svg
+      .axis()
+      .orient("right")
+      .scale(yScale)
+      .ticks(5)
+      .tickSize(width);
+
+    this.axis = axis;
+
+    // formart axis' ticks
+    svg.append("g").attr("class", "y axis").call(axis).call(function(g) {
+      g.selectAll("text").remove();
+      g.select(".domain").remove();
+      g
+        .selectAll(".tick line")
+        .attr("stroke", "#ccc")
+        .attr("stroke-dasharray", "2,2");
+    });
+
+    // format axis labels
+    var axisLabel = d3.svg.axis().orient("left").scale(yScale).ticks(5, "%");
+
+    this.axisLabel = axisLabel;
+
+    // remove unwanted tick lines and domain
+    svg
+      .append("g")
+      .attr("class", "y axis-label")
+      .call(axisLabel)
+      .call(function(g) {
+        g.selectAll(".tick line").remove();
+        g.select(".domain").remove();
+      });
+
+    svg
+      .append("g")
+      .append("text")
+      .style("fill", colors.men)
+      .attr("class", "x label men")
+      .attr("text-anchor", "end")
+      .attr("x", xScale(data.series.length - 1))
+      .attr("y", chartHeight + margin.right + 5)
+      .text("Homens recebem mais →");
+
+    svg
+      .append("g")
+      .append("text")
+      .style("fill", colors.women)
+      .attr("class", "x label women")
+      .attr("text-anchor", "begin")
+      .attr("x", xScale(0))
+      .attr("y", chartHeight + margin.right + 5)
+      .text("← Mulheres recebem mais");
 
     var lines = svg
       .append("g")
@@ -220,87 +266,40 @@ class Chart extends React.Component {
       })
       .call(self.positionLine);
 
-    // add y axis
-    var axis = d3.svg
-      .axis()
-      .orient("right")
-      .scale(yScale)
-      .ticks(3)
-      .tickSize(width);
+    // svg.on("mouseout", function() {
+    //   if (self.state.frozen) return;
+    //   self.resetChart();
+    // });
 
-    // formart axis' ticks
-    svg.append("g").call(axis).call(function(g) {
-      g.selectAll("text").remove();
-      g.select(".domain").remove();
-      g
-        .selectAll(".tick line")
-        .attr("stroke", "#777")
-        .attr("stroke-dasharray", "2,2");
-    });
+    // svg.on("click", function() {
+    //   var frozen = true;
+    //   if (self.state && self.state.frozen) {
+    //     frozen = false;
+    //   }
+    //
+    //   self.setState({
+    //     frozen: frozen
+    //   });
+    // });
 
-    // format axis labels
-    var axisLabel = d3.svg.axis().orient("left").scale(yScale).ticks(5, "%");
-
-    svg
-      .append("g")
-      .append("text")
-      .style("fill", colors.men)
-      .attr("class", "x label men")
-      .attr("text-anchor", "end")
-      .attr("x", xScale(data.series.length - 1))
-      .attr("y", height + margin.right + 5)
-      .text("Homens recebem mais →");
-
-    svg
-      .append("g")
-      .append("text")
-      .style("fill", colors.women)
-      .attr("class", "x label women")
-      .attr("text-anchor", "begin")
-      .attr("x", xScale(0))
-      .attr("y", height + margin.right + 5)
-      .text("← Mulheres recebem mais");
-
-    // remove unwanted tick lines and domain
-    svg.append("g").call(axisLabel).call(function(g) {
-      g.selectAll(".tick line").remove();
-      g.select(".domain").remove();
-    });
-
-    svg.on("mouseout", function() {
-      if (self.state.frozen) return;
-      self.resetChart();
-    });
-
-    svg.on("click", function() {
-      var frozen = true;
-      if (self.state && self.state.frozen) {
-        frozen = false;
-      }
-
-      self.setState({
-        frozen: frozen
-      });
-    });
-
-    svg.on("mousemove", function(param1, param2, param3, param4) {
-      if (self.state.frozen) return;
-      var mouse = d3.mouse(this.component.childNodes[0]);
-      var { numberOfProfessions } = data;
-      self.xScale = self.xFisheyeScale.distortion(10).focus(mouse[0]);
-
-      var position = Math.round(self.xLinerScale.invert(mouse[0]));
-
-      if (position < 0) {
-        position = 0;
-      } else if (position > numberOfProfessions - 1) {
-        position = numberOfProfessions - 1;
-      }
-
-      self.setState({ selectedProfession: position });
-
-      self.updatePositions();
-    });
+    // svg.on("mousemove", function(param1, param2, param3, param4) {
+    //   if (self.state.frozen) return;
+    //   var mouse = d3.mouse(this.component.childNodes[0]);
+    //   var { numberOfProfessions } = data;
+    //   self.xScale = self.xFisheyeScale.distortion(10).focus(mouse[0]);
+    //
+    //   var position = Math.round(self.xLinearScale.invert(mouse[0]));
+    //
+    //   if (position < 0) {
+    //     position = 0;
+    //   } else if (position > numberOfProfessions - 1) {
+    //     position = numberOfProfessions - 1;
+    //   }
+    //
+    //   self.setState({ selectedProfession: position });
+    //
+    //   self.updatePositions();
+    // });
   }
 
   updatePositions() {
@@ -317,7 +316,7 @@ class Chart extends React.Component {
   resetChart() {
     var faux = this.props.connectFauxDOM("div", "chart");
     var svg = d3.select(faux).select("svg");
-    const { yScale, xLinerScale } = this;
+    const { yScale, xLinearScale } = this;
 
     svg
       .select("g")
@@ -325,13 +324,13 @@ class Chart extends React.Component {
       .style("stroke-width", 2)
       .style("opacity", 1)
       .attr("x1", function(d, i) {
-        return xLinerScale(i);
+        return xLinearScale(i);
       })
       .attr("y1", function(d, i) {
         return yScale(0);
       })
       .attr("x2", function(d, i) {
-        return xLinerScale(i);
+        return xLinearScale(i);
       })
       .attr("y2", function(d, i) {
         return yScale(Math.abs(d.relativeGap));
@@ -348,4 +347,4 @@ Chart.defaultProps = {
 
 const FauxChart = withFauxDOM(Chart);
 
-export default Dimensions()(FauxChart);
+export default FauxChart;

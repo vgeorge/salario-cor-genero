@@ -383,7 +383,7 @@ class SearchBox extends SelectSearch {
   }
 
   render() {
-    var { data, selectedProfession, onProfessionEnter } = this.props;
+    var { data, selectedProfession, onChange } = this.props;
 
     // Load professions if not already
     if (this.professions.length == 0 && data && data.series) {
@@ -398,7 +398,7 @@ class SearchBox extends SelectSearch {
 
     return (
       <Wrapper>
-        <div className="search-container">
+        <div className="search-container" style={{ width: "100%" }}>
           <SelectSearch
             options={this.professions}
             value={selectedProfession}
@@ -406,12 +406,9 @@ class SearchBox extends SelectSearch {
             placeholder="Busque uma profissão"
             noResultsText="Sem resultados para este termo de busca."
             clearValue="Desafixar profissão"
-            onChange={onProfessionEnter}
+            onChange={onChange}
           />
         </div>
-        {/* <InfoBox>
-          <p>Test</p>
-        </InfoBox> */}
       </Wrapper>
     );
   }

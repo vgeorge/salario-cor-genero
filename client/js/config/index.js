@@ -11,7 +11,9 @@ const config = {
     }
   },
   chart: {
-    xBuffer: 50
+    xBuffer: 50,
+    barStroke: 2,
+    margin: { top: 10, right: 20, bottom: 50, left: 50 }
   }
 };
 

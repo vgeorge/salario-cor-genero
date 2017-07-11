@@ -51,7 +51,9 @@ var format = locale({
 
 const functions = {
   currency: format.numberFormat("$,.2f"),
-  percent: format.numberFormat(".1%")
+  percent: (value, precision) => {
+    return format.numberFormat(`.${precision || 0}%`)(value);
+  }
 };
 
 export default functions;
