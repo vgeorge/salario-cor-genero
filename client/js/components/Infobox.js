@@ -7,14 +7,15 @@ const MaleIcon = require("react-icons/lib/fa/male");
 const FemaleIcon = require("react-icons/lib/fa/female");
 
 const Wrapper = styled.div`
+  pointer-events: none;
+
   position: absolute;
-  left: 110px;
+  left: 50%;
+  margin-left: -75px;
   top: 80px;
-  border: 1px solid #ccc;
   padding: 10px;
-  background: white;
+  background: none;
   height: 170px;
-  width: 150px;
   h3, p {
     text-align: center;
   }
