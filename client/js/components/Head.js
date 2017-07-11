@@ -35,16 +35,16 @@ class Head extends Component {
         ref={element => {
           if (element) this.wrapperDiv = element;
         }}
+        style={{ "text-align": "center" }}
       >
         <h1>Diferenças salariais entre homens e mulheres</h1>
         <p>
-          Segundo pesquisa CAGED{" "}2016, do Ministério do Trabalho e
-          Emprego, homens ganham mais em{" "}
+          Segundo dados do Ministério do Trabalho, homens ganharam salários
+          maiores em{" "}
           {format.percent(
             data.professionsWomanEarnLess / data.numberOfProfessions
           )}{" "}
-          {" "}
-          das profissões.
+          das carreiras em 2016.
         </p>
         {data.series &&
           <SearchBox
