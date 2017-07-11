@@ -67,10 +67,8 @@ class Chart extends React.Component {
 
       const { margin, xBuffer } = config.chart;
 
-      // const { xLinearScale, xFisheyeScale, yScale } = this;
-
       const width = containerWidth - margin.left - margin.right;
-      const height = containerHeight - headHeight;
+      const height = containerHeight - headHeight - 2 * margin.top;
       const chartHeight = height - margin.top - margin.bottom;
 
       var faux = this.props.connectFauxDOM("div", "chart");

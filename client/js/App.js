@@ -157,7 +157,8 @@ class App extends Component {
 
     newDimensions.svgWidth = newDimensions.containerWidth;
 
-    newDimensions.headHeight = this.headHeight || 150;
+    newDimensions.headHeight =
+      this.state.dimensions.headHeight || this.headHeight || 150;
 
     this.setState({ dimensions: newDimensions });
 

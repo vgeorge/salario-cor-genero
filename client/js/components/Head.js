@@ -35,7 +35,7 @@ class Head extends Component {
         ref={element => {
           if (element) this.wrapperDiv = element;
         }}
-        style={{ "text-align": "center" }}
+        style={{ textAlign: "center" }}
       >
         <h1>Diferenças salariais entre homens e mulheres</h1>
         <p>
