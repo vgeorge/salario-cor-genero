@@ -37,7 +37,7 @@ class Head extends Component {
         }}
         style={{ textAlign: "center" }}
       >
-        <h1>Diferenças salariais entre homens e mulheres</h1>
+        <h1>Quanto eles ganham mais?</h1>
         <p>
           Segundo dados do Ministério do Trabalho, homens ganharam salários
           maiores em{" "}
