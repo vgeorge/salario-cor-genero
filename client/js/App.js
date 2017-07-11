@@ -35,6 +35,7 @@ class App extends Component {
 
     this._onResize = this._onResize.bind(this);
     this._onSearchBoxChange = this._onSearchBoxChange.bind(this);
+    this._onChangeMouseX = this._onChangeMouseX.bind(this);
 
     this.state = {
       data: {
@@ -145,7 +146,6 @@ class App extends Component {
   }
 
   _onResize() {
-    console.log("onResize");
     const { outerBox } = config;
 
     var newDimensions = {
@@ -183,9 +183,23 @@ class App extends Component {
     }
   }
 
+  // _onSelectedProfessionChange(professionId) {
+  //   this.setState({
+  //     selectedProfession: professionId
+  //   });
+  // }
+
+  _onChangeMouseX(newMouseX, hoveredProfessionId) {
+    if (!this.state.frozen)
+      this.setState({
+        mouseX: newMouseX,
+        selectedProfession: hoveredProfessionId
+      });
+  }
+
   render() {
     var self = this;
-    var { data, selectedProfession, dimensions } = this.state;
+    var { data, selectedProfession, dimensions, frozen } = this.state;
     const { margin, padding } = config.outerBox;
 
     return (
@@ -196,11 +210,15 @@ class App extends Component {
       >
         <Head
           data={data}
+          selectedProfession={selectedProfession}
+          frozen={frozen}
+          _onSearchBoxChange={self._onSearchBoxChange}
           getHeight={headHeight => {
             self.updateHeadHeight(headHeight);
           }}
         />
-        {data.series && <Chart {...this.state} />}
+        {data.series &&
+          <Chart {...this.state} _onChangeMouseX={self._onChangeMouseX} />}
       </Wrapper>
     );
   }

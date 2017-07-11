@@ -405,7 +405,8 @@ class SearchBox extends SelectSearch {
             name="profession"
             placeholder="Busque uma profissão"
             noResultsText="Sem resultados para este termo de busca."
-            clearValue="Desafixar profissão"
+            clearable={this.props.frozen}
+            clearValue="Limpar profissão selecionada."
             onChange={onChange}
           />
         </div>

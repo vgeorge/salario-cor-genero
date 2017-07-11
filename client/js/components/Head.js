@@ -28,7 +28,7 @@ class Head extends Component {
   }
 
   render() {
-    const { data, selectedProfession } = this.props;
+    const { data, selectedProfession, _onSearchBoxChange, frozen } = this.props;
 
     return (
       <div
@@ -50,7 +50,8 @@ class Head extends Component {
           <SearchBox
             data={data}
             selectedProfession={selectedProfession}
-            onChange={this._onSearchBoxChange}
+            frozen={frozen}
+            onChange={_onSearchBoxChange}
           />}
       </div>
     );

@@ -1,3 +1,4 @@
+import { debounce } from "lodash";
 import React from "react";
 import styled from "styled-components";
 
@@ -43,7 +44,21 @@ class Chart extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.dimensions !== prevProps.dimensions) {
+    const { selectedProfession, mouseX, frozen } = this.props;
+
+    if (mouseX !== prevProps.mouseX && !frozen) {
+      // Mouse movements
+
+      if (mouseX == null) {
+        this.xScale = this.xLinearScale;
+      } else {
+        this.xScale = this.xFisheyeScale.distortion(10).focus(mouseX);
+      }
+
+      this.updatePositions();
+    } else if (selectedProfession !== prevProps.selectedProfession) {
+      this.updatePositions();
+    } else if (this.props.dimensions !== prevProps.dimensions) {
       const {
         containerWidth,
         containerHeight,
@@ -62,7 +77,7 @@ class Chart extends React.Component {
       var svg = d3.select(faux).select("svg");
 
       svg.attr("height", height);
-      svg.attr("width", width);
+      svg.attr("width", containerWidth);
 
       this.xLinearScale.range([xBuffer, width - xBuffer]);
       this.xFisheyeScale.range([xBuffer, width - xBuffer]);
@@ -104,7 +119,7 @@ class Chart extends React.Component {
 
     return (
       <Wrapper className="relative-gap-chart">
-        {selectedProfession >= 0 &&
+        {selectedProfession != null &&
           <Infobox data={data} selectedProfession={selectedProfession} />}
         {this.props.chart}
 
@@ -114,7 +129,7 @@ class Chart extends React.Component {
 
   positionLine(line) {
     const { xScale, yScale } = this;
-    const { selectedProfession } = this.state;
+    const { selectedProfession } = this.props;
 
     line
       .style("stroke-width", function(d, i) {
@@ -137,7 +152,7 @@ class Chart extends React.Component {
       })
       .attr("y2", function(d, i) {
         return yScale(
-          Math.abs(d.relativeGap * (selectedProfession == i ? 1.5 : 1))
+          Math.abs(d.relativeGap * (selectedProfession == i ? 1.3 : 1))
         );
       });
   }
@@ -147,7 +162,13 @@ class Chart extends React.Component {
 
     const { colors } = config;
     const { margin, xBuffer } = config.chart;
-    const { data } = this.props;
+    const { data, _onChangeMouseX } = this.props;
+
+    self._debouncedOnChangeMouseX = debounce(
+      _onChangeMouseX,
+      config.debounceTime
+    );
+
     const {
       containerWidth,
       containerHeight,
@@ -159,8 +180,6 @@ class Chart extends React.Component {
     const svgHeight = containerHeight - headHeight;
     const chartHeight = svgHeight - margin.top - margin.bottom;
 
-    console.log("render height", chartHeight);
-
     // Connect to faux dom
     var faux = this.props.connectFauxDOM("div", "chart");
 
@@ -168,18 +187,18 @@ class Chart extends React.Component {
     var svg = d3
       .select(faux)
       .append("svg")
-      .attr("width", svgWidth)
+      .attr("width", containerWidth)
       .attr("height", svgHeight)
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Add a background rect for mousemove.
-    // svg
-    //   .append("rect")
-    //   .attr("class", "background")
-    //   .attr("fill", "#fff")
-    //   .attr("width", svgWidth)
-    //   .attr("height", chartHeight);
+    svg
+      .append("rect")
+      .attr("class", "background")
+      .attr("fill", "#fff")
+      .attr("width", width)
+      .attr("height", chartHeight);
 
     // Create fisheye scale
     this.xFisheyeScale = d3Fisheye
@@ -195,7 +214,7 @@ class Chart extends React.Component {
 
     var yScale = (this.yScale = d3.scale
       .linear()
-      .domain([0, data.relativeGapMax + 0.1])
+      .domain([0, data.relativeGapMax * 1.5])
       .range([chartHeight, 0]));
 
     // add y axis
@@ -266,40 +285,36 @@ class Chart extends React.Component {
       })
       .call(self.positionLine);
 
-    // svg.on("mouseout", function() {
-    //   if (self.state.frozen) return;
-    //   self.resetChart();
-    // });
+    svg.on("mouseout", function() {
+      if (self.state.frozen) return;
 
-    // svg.on("click", function() {
-    //   var frozen = true;
-    //   if (self.state && self.state.frozen) {
-    //     frozen = false;
-    //   }
-    //
-    //   self.setState({
-    //     frozen: frozen
-    //   });
-    // });
+      // change app state
+      self._debouncedOnChangeMouseX(null, null);
+    });
 
-    // svg.on("mousemove", function(param1, param2, param3, param4) {
-    //   if (self.state.frozen) return;
-    //   var mouse = d3.mouse(this.component.childNodes[0]);
-    //   var { numberOfProfessions } = data;
-    //   self.xScale = self.xFisheyeScale.distortion(10).focus(mouse[0]);
-    //
-    //   var position = Math.round(self.xLinearScale.invert(mouse[0]));
-    //
-    //   if (position < 0) {
-    //     position = 0;
-    //   } else if (position > numberOfProfessions - 1) {
-    //     position = numberOfProfessions - 1;
-    //   }
-    //
-    //   self.setState({ selectedProfession: position });
-    //
-    //   self.updatePositions();
-    // });
+    svg.on("mousemove", function(param1, param2, param3, param4) {
+      // ignore mouse movements when chart is frozen
+      if (self.state.frozen) return;
+
+      // get hover meta
+      const mouse = d3.mouse(this.component.childNodes[0]);
+      var mouseX = mouse[0];
+
+      var hoveredProfessionId = Math.round(self.xLinearScale.invert(mouseX));
+
+      // MouseX should fit bounds
+      const lastProfessionID = data.series.length - 1;
+      if (hoveredProfessionId < 0) {
+        hoveredProfessionId = 0;
+        mouseX = xBuffer;
+      } else if (hoveredProfessionId > lastProfessionID) {
+        hoveredProfessionId = lastProfessionID;
+        mouseX = width - xBuffer;
+      }
+
+      // change app state
+      self._debouncedOnChangeMouseX(mouseX, hoveredProfessionId);
+    });
   }
 
   updatePositions() {
