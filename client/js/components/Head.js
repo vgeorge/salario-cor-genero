@@ -37,10 +37,9 @@ class Head extends Component {
         }}
         style={{ textAlign: "center" }}
       >
-        <h1>Quanto eles ganham mais?</h1>
+        <h1>Qual a diferença salarial?</h1>
         <p>
-          Segundo dados do Ministério do Trabalho, homens ganharam salários
-          maiores em{" "}
+          Homens ganharam salários maiores em{" "}
           {format.percent(
             data.professionsWomanEarnLess / data.numberOfProfessions
           )}{" "}

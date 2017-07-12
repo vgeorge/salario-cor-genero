@@ -184,12 +184,6 @@ class App extends Component {
     }
   }
 
-  // _onSelectedProfessionChange(professionId) {
-  //   this.setState({
-  //     selectedProfession: professionId
-  //   });
-  // }
-
   _onChangeMouseX(newMouseX, hoveredProfessionId) {
     if (!this.state.frozen)
       this.setState({
@@ -215,11 +209,24 @@ class App extends Component {
           frozen={frozen}
           _onSearchBoxChange={self._onSearchBoxChange}
           getHeight={headHeight => {
+            if (headHeight < 150) headHeight = 150;
             self.updateHeadHeight(headHeight);
           }}
         />
         {data.series &&
           <Chart {...this.state} _onChangeMouseX={self._onChangeMouseX} />}
+
+        <p
+          style={{
+            position: "absolute",
+            right: "50px",
+            bottom: "20px",
+            "font-style": "italic"
+          }}
+        >
+          Fonte: Ministério do Trabalho
+        </p>
+
       </Wrapper>
     );
   }
