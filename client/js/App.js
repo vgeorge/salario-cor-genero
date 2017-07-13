@@ -54,7 +54,7 @@ class App extends Component {
 
     // load data
     var self = this;
-    csv("data-rais.csv", function(csvData) {
+    csv("data.csv", function(csvData) {
       var data = Object.assign({}, self.state.data);
 
       data["series"] = csvData
@@ -221,7 +221,8 @@ class App extends Component {
             position: "absolute",
             right: "50px",
             bottom: "20px",
-            "font-style": "italic"
+            fontStyle: "italic",
+            fontSize: "small"
           }}
         >
           Fonte: Ministério do Trabalho
