@@ -224,7 +224,7 @@ class App extends Component {
             fontSize: "small"
           }}
         >
-          Fonte: Ministério do Trabalho
+          Fonte: CAGED/Ministério do Trabalho
         </p>
 
       </Wrapper>
