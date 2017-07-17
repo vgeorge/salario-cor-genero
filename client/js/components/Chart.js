@@ -352,7 +352,7 @@ class Chart extends React.Component {
 }
 
 Chart.defaultProps = {
-  chart: "Carregando...",
+  chart: "",
   loaded: false
 };
 

@@ -38,20 +38,22 @@ class Head extends Component {
         style={{ textAlign: "center" }}
       >
         <h1>Qual a diferença salarial?</h1>
-        <p>
-          Homens ganharam salários maiores em{" "}
-          {format.percent(
-            data.professionsWomanEarnLess / data.numberOfProfessions
-          )}{" "}
-          das carreiras em 2016.
-        </p>
-        {data.series &&
+
+        {data.series && [
+          <p>
+            Homens ganharam salários maiores em{" "}
+            {format.percent(
+              data.professionsWomanEarnLess / data.numberOfProfessions
+            )}{" "}
+            das carreiras em 2016.
+          </p>,
           <SearchBox
             data={data}
             selectedProfession={selectedProfession}
             frozen={frozen}
             onChange={_onSearchBoxChange}
-          />}
+          />
+        ]}
       </div>
     );
   }
