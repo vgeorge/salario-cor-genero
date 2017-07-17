@@ -156,6 +156,7 @@ const Wrapper = styled.div`
     vertical-align: middle;
   }
   .Select-clear-zone {
+    background-color: #fff;
     -webkit-animation: Select-animation-fadeIn 200ms;
     -o-animation: Select-animation-fadeIn 200ms;
     animation: Select-animation-fadeIn 200ms;
@@ -179,6 +180,7 @@ const Wrapper = styled.div`
     width: 17px;
   }
   .Select-arrow-zone {
+    background-color: #fff;
     cursor: pointer;
     display: table-cell;
     position: relative;
@@ -398,7 +400,15 @@ class SearchBox extends SelectSearch {
 
     return (
       <Wrapper>
-        <div className="search-container" style={{ width: "100%" }}>
+        <div
+          className="search-container"
+          style={{
+            width: "100%",
+            marginLeft: "auto",
+            marginRight: "auto",
+            maxWidth: 450
+          }}
+        >
           <SelectSearch
             options={this.professions}
             value={selectedProfession}
