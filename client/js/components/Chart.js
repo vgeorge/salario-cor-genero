@@ -149,9 +149,7 @@ class Chart extends React.Component {
         return xScale(i);
       })
       .attr("y2", function(d, i) {
-        return yScale(
-          Math.abs(d.relativeGap * (selectedProfession == i ? 1.3 : 1))
-        );
+        return yScale(Math.abs(d.relativeGap));
       });
   }
 
