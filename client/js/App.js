@@ -19,7 +19,6 @@ injectGlobal`
 
 const Wrapper = styled.div`
   font-family: Merriweather sans, sans-serif;
-  border: 1px solid black;
   margin: ${props => props.margin}px;
   padding: ${props => props.padding.top}px ${props => props.padding.left}px;
   height: ${props => props.containerHeight}px;
