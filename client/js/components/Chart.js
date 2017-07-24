@@ -214,7 +214,7 @@ class Chart extends React.Component {
 
     var yScale = (this.yScale = d3.scale
       .linear()
-      .domain([0, data.relativeGapMax * 1.5])
+      .domain([0, 2.49])
       .range([chartHeight, 0]));
 
     // add y axis
@@ -222,7 +222,7 @@ class Chart extends React.Component {
       .axis()
       .orient("right")
       .scale(yScale)
-      .ticks(5)
+      .ticks(4)
       .tickSize(width);
 
     this.axis = axis;
