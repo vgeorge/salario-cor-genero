@@ -24,6 +24,10 @@ const Wrapper = styled.div`
   .tick {
     pointer-events: none;
   }
+
+  .axis-label {
+    font-size: 13px;
+  }
 `;
 
 class Chart extends React.Component {
