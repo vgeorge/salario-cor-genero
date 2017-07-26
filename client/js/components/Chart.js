@@ -7,7 +7,6 @@ import * as d3 from "d3";
 import d3Fisheye from "../helpers/d3-fisheye.js";
 
 /* Components */
-import Infobox from "./Infobox";
 import { withFauxDOM } from "react-faux-dom";
 
 /* Chart config */
@@ -121,8 +120,6 @@ class Chart extends React.Component {
 
     return (
       <Wrapper className="relative-gap-chart">
-        {selectedProfession != null &&
-          <Infobox data={data} selectedProfession={selectedProfession} />}
         {this.props.chart}
 
       </Wrapper>

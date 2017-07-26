@@ -11,11 +11,12 @@ const Wrapper = styled.div`
 
   position: absolute;
   left: 50%;
-  margin-left: -75px;
-  top: 100px;
+  margin-left: -105px;
+  top: 265px;
+  z-index: 1;
   padding: 10px;
   background: #fff;
-  height: 170px;
+  height: 150px;
   h3, p {
     text-align: center;
   }

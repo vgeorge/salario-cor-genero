@@ -8,6 +8,7 @@ import config from "./config";
 
 import Head from "./components/Head";
 import Chart from "./components/Chart";
+import Infobox from "./components/Infobox";
 
 /* eslint-disable no-unused-expressions */
 injectGlobal`
@@ -196,6 +197,8 @@ class App extends Component {
     var { data, selectedProfession, dimensions, frozen } = this.state;
     const { margin, padding } = config.outerBox;
 
+    const displayChart = data.series && dimensions.containerWidth > 590;
+
     return (
       <Wrapper
         containerHeight={dimensions.containerHeight}
@@ -212,7 +215,10 @@ class App extends Component {
             self.updateHeadHeight(headHeight);
           }}
         />
-        {data.series &&
+        {selectedProfession != null &&
+          <Infobox data={data} selectedProfession={selectedProfession} />}
+
+        {displayChart &&
           <Chart {...this.state} _onChangeMouseX={self._onChangeMouseX} />}
 
         <p

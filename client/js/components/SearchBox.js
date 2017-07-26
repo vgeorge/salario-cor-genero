@@ -5,6 +5,7 @@ import styled from "styled-components";
 const Wrapper = styled.div`
   .Select {
     position: relative;
+    z-index:2;    
   }
   .Select,
   .Select div,
