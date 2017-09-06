@@ -6,6 +6,7 @@ import { csv, ascending, max } from "d3";
 import styled, { injectGlobal } from "styled-components";
 import config from "./config";
 
+import About from "./components/About";
 import Head from "./components/Head";
 import Chart from "./components/Chart";
 import Infobox from "./components/Infobox";
@@ -221,17 +222,7 @@ class App extends Component {
         {displayChart &&
           <Chart {...this.state} _onChangeMouseX={self._onChangeMouseX} />}
 
-        <p
-          style={{
-            position: "absolute",
-            right: "50px",
-            bottom: "20px",
-            fontStyle: "italic",
-            fontSize: "small"
-          }}
-        >
-          Fonte: CAGED/Ministério do Trabalho
-        </p>
+        <About />
 
       </Wrapper>
     );
