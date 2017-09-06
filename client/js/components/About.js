@@ -19,8 +19,8 @@ const customStyles = {
 
 const OpenModalButton = styled.a`
   position: absolute;
-  right: 50px;
-  bottom: 20px;
+  right: 70px;
+  bottom: 30px;
   display: inline-block;
   padding: .7rem 1.5rem;
   border: 1px solid #ccc;

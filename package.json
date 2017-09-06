@@ -15,9 +15,8 @@
   ],
   "scripts": {
     "watch": "webpack -w",
-    "build": "webpack -p",
     "serve": "jekyll serve -w",
-    "deploy": "jekyll build -d docs"
+    "deploy": "webpack -p && jekyll build -d docs"
   },
   "author": "Vitor George <vitor.george@aparabolica.com.br>",
   "license": "MIT",

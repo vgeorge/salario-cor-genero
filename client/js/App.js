@@ -17,6 +17,7 @@ injectGlobal`
     margin: 0;
     overflow: hidden;
     color: rgb(114,135,144);
+    font-family: Merriweather sans, sans-serif;
   }
 
   a {
@@ -25,7 +26,6 @@ injectGlobal`
 `;
 
 const Wrapper = styled.div`
-  font-family: Merriweather sans, sans-serif;
   margin: ${props => props.margin}px;
   padding: ${props => props.padding.top}px ${props => props.padding.left}px;
   height: ${props => props.containerHeight}px;

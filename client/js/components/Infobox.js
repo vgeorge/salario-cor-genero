@@ -48,7 +48,7 @@ class Infobox extends Component {
           <FemaleIcon /> {format.currency(profession.womenSalary)}
         </p>
         <p>
-          {genderWithBetterSalary} recebem{" "}
+          {genderWithBetterSalary} receberam{" "}
           {format.percent(Math.abs(profession.relativeGap))} mais
         </p>
       </Wrapper>
