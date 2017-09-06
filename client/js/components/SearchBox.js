@@ -31,7 +31,6 @@ const Wrapper = styled.div`
     border-color: #d9d9d9 #ccc #b3b3b3;
     border-radius: 4px;
     border: 1px solid #ccc;
-    color: #333;
     cursor: default;
     display: table;
     border-spacing: 0;
@@ -72,7 +71,6 @@ const Wrapper = styled.div`
   .Select-placeholder,
   .Select--single > .Select-control .Select-value {
     bottom: 0;
-    color: #aaa;
     left: 0;
     line-height: 34px;
     padding-left: 10px;
@@ -87,7 +85,6 @@ const Wrapper = styled.div`
   }
   .has-value.Select--single > .Select-control .Select-value .Select-value-label,
   .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
-    color: #333;
   }
   .has-value.Select--single > .Select-control .Select-value a.Select-value-label,
   .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value a.Select-value-label {
@@ -98,7 +95,7 @@ const Wrapper = styled.div`
   .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value a.Select-value-label:hover,
   .has-value.Select--single > .Select-control .Select-value a.Select-value-label:focus,
   .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value a.Select-value-label:focus {
-    color: #007eff;
+    color: rgb(171,112,128);
     outline: none;
     text-decoration: underline;
   }
@@ -267,13 +264,11 @@ const Wrapper = styled.div`
     background-color: #f5faff;
     /* Fallback color for IE 8 */
     background-color: rgba(0, 126, 255, 0.04);
-    color: #333;
   }
   .Select-option.is-focused {
     background-color: #ebf5ff;
     /* Fallback color for IE 8 */
     background-color: rgba(0, 126, 255, 0.08);
-    color: #333;
   }
   .Select-option.is-disabled {
     color: #cccccc;
@@ -353,7 +348,6 @@ const Wrapper = styled.div`
   .Select--multi.is-disabled .Select-value {
     background-color: #fcfcfc;
     border: 1px solid #e3e3e3;
-    color: #333;
   }
   .Select--multi.is-disabled .Select-value-icon {
     cursor: not-allowed;

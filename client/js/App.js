@@ -16,6 +16,7 @@ injectGlobal`
   body {
     margin: 0;
     overflow: hidden;
+    color: rgb(114,135,144);
   }
 `;
 

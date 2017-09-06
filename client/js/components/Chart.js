@@ -26,6 +26,7 @@ const Wrapper = styled.div`
 
   .axis-label {
     font-size: 13px;
+    fill: rgb(114,135,144);
   }
 `;
 
