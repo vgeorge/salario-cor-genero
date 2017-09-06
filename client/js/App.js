@@ -18,6 +18,10 @@ injectGlobal`
     overflow: hidden;
     color: rgb(114,135,144);
   }
+
+  a {
+    color: rgb(114,135,144);
+  }
 `;
 
 const Wrapper = styled.div`

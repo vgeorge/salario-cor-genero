@@ -21,8 +21,6 @@ const OpenModalButton = styled.a`
   position: absolute;
   right: 50px;
   bottom: 20px;
-  font-size: small;
-  letter-spacing: 0.06em;
   display: inline-block;
   padding: .7rem 1.5rem;
   border: 1px solid #ccc;
@@ -72,7 +70,7 @@ class About extends React.Component {
     return (
       <div>
         <OpenModalButton onClick={this.openModal}>
-          {" "}Sobre esta visualização{" "}
+          {" "}Sobre{" "}
         </OpenModalButton>
         <Modal
           isOpen={this.state.modalIsOpen}
@@ -81,32 +79,26 @@ class About extends React.Component {
           style={customStyles}
           contentLabel="Example Modal"
         >
-
-          <h1>Sobre esta visualização</h1>
           <p>
-            Deserunt nostrud laborum tempor exercitation eu adipisicing eu qui
-            eiusmod commodo consequat elit dolor reprehenderit est quis. Est
-            esse dolor et minim dolor aute enim. Elit consequat culpa
-            reprehenderit dolore officia velit dolor sint ad commodo mollit.
-            Est eiusmod ad deserunt laboris laborum elit ex duis sint tempor.
+            Você sabe dizer qual a diferença salarial entre mulheres e homens
+            empregados na sua profissão? Essa visualização busca evidenciar a
+            brecha salarial de gênero. Para navegar, escolha uma carreira na
+            caixa de busca ou passe o mouse sobre as barras interativas.
           </p>
 
           <p>
-            Ipsum tempor qui aliquip ex pariatur ut laborum mollit est enim
-            ullamco culpa sunt. Commodo laboris exercitation aute dolor et
-            tempor esse tempor nisi sit dolore minim fugiat laborum in
-            deserunt anim. Magna voluptate ipsum amet irure consequat irure
-            occaecat quis occaecat nulla reprehenderit deserunt elit irure
-            dolore velit nostrud.
+            A visualização foi gerada a partir dos dados estatísticos do
+            Cadastro Geral de Empregados e Desempregados – CAGED, relativos a
+            todos os meses de 2016. A base do CAGED abrange os trabalhadores
+            regidos pela CLT, ou seja, em situação formal de trabalho. A leitura
+            dos dados deve ser feita levando em consideração esse aspecto, o
+            que, no caso de profissões em que a informalidade é predominante,
+            pode gerar distorções na análise.
           </p>
-
           <p>
-            Ad enim nostrud dolor Lorem tempor Lorem Lorem do reprehenderit
-            laboris. Mollit duis aute cupidatat deserunt est esse laborum
-            commodo eu non cillum officia consequat elit consectetur
-            consectetur. Incididunt labore qui officia dolor pariatur qui
-            aliquip adipisicing. Consequat aute magna adipisicing ad aute
-            eiusmod mollit ipsum.
+            <a href="data.csv" download>
+              Baixe aqui a base de dados em formato CSV.
+            </a>
           </p>
         </Modal>
       </div>

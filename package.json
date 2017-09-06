@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "watch": "webpack -w",
-    "build": "webpack --config webpack.prod.js",
+    "build": "webpack -p",
     "serve": "jekyll serve -w",
     "deploy": "jekyll build -d docs"
   },
@@ -40,6 +40,6 @@
     "react-select": "^1.0.0-rc.5",
     "react-window-resize-listener": "^1.1.0",
     "styled-components": "^2.1.0",
-    "webpack": "^1.15.0",
+    "webpack": "^1.15.0"
   }
 }

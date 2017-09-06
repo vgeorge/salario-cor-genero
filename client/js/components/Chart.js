@@ -258,7 +258,7 @@ class Chart extends React.Component {
       .attr("text-anchor", "end")
       .attr("x", xScale(data.series.length - 1))
       .attr("y", chartHeight + margin.right + 5)
-      .text("Homens recebem mais →");
+      .text("Homens receberam mais →");
 
     svg
       .append("g")
@@ -268,7 +268,7 @@ class Chart extends React.Component {
       .attr("text-anchor", "begin")
       .attr("x", xScale(0))
       .attr("y", chartHeight + margin.right + 5)
-      .text("← Mulheres recebem mais");
+      .text("← Mulheres receberam mais");
 
     var lines = svg
       .append("g")
