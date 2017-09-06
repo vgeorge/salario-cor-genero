@@ -13,7 +13,13 @@
     "gender",
     "race"
   ],
-  "author": "Vitor George",
+  "scripts": {
+    "watch": "webpack -w",
+    "build": "webpack --config webpack.prod.js",
+    "serve": "jekyll serve -w",
+    "deploy": "jekyll build -d docs"
+  },
+  "author": "Vitor George <vitor.george@aparabolica.com.br>",
   "license": "MIT",
   "homepage": "https://vgeorge.github.com/salario-e-genero",
   "devDependencies": {
@@ -30,10 +36,10 @@
     "react-dom": "^15.5.4",
     "react-faux-dom": "^4.0.3",
     "react-icons": "^2.2.5",
+    "react-modal": "^2.2.4",
     "react-select": "^1.0.0-rc.5",
     "react-window-resize-listener": "^1.1.0",
     "styled-components": "^2.1.0",
     "webpack": "^1.15.0",
-    "react-modal": "^2.2.4"
   }
 }

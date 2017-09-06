@@ -1,5 +1,16 @@
 > [Visualization of pay gap between gender in Brazil.](https://vgeorge.github.io/salario-e-genero)
 
+# Developing
+
+This visualization is built with D3, React, Jekyll and Webpack. The following tasks area avaiable:
+
+* `npm run server`: serve at http://localhost:4000/
+* `npm run watch`: start webpack watch
+* `npm run build`: prepare bundle for deploy
+* `npm run deploy`: copy bundle to /docs folder
+
+Make editions, deploy to `/docs` folder and commit.
+
 # References
 
 Visualizations:
@@ -20,10 +31,6 @@ React and Jekyll:
 * [Using Webpack and React with Jekyll]( https://medium.com/@allizadrozny/using-webpack-and-react-with-jekyll-cfe137f8a2cc)
 * [mdxprograms/jekyll-webpack-react]( https://github.com/mdxprograms/jekyll-webpack-react)
 * [allizad/jekyll-webpack]( https://github.com/allizad/jekyll-webpack)
-
-# Run it locally
-
-This visualization is built with D3, React, Jekyll and Webpack. To run it locally, clone this repository and run `webpack -w` and `jekyll s -w` in different terminal windows.
 
 # License
 
